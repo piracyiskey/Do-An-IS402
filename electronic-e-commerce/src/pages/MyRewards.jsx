@@ -122,7 +122,7 @@ export default function MyRewards() {
     }
   };
 
-  const isVip = user?.membership_tier_id === 4 || user?.member_tier_id === 4;
+  const isVip = user?.membership_tier_id === "vip";
   const pointsValue = ((user?.reward_points || 0) / 100).toFixed(2);
 
   // Button gradient matching tier card
@@ -302,7 +302,7 @@ export default function MyRewards() {
               <li className="flex items-start gap-2 text-gray-700">
                 <CheckCircle className="w-5 h-5 text-green-500 flex-shrink-0 mt-0.5" />
                 <span>
-                  <strong>2x Points</strong> on all purchases
+                  <strong>6x Points</strong> on all purchases
                 </span>
               </li>
               <li className="flex items-start gap-2 text-gray-700">
@@ -378,11 +378,11 @@ export default function MyRewards() {
 
                 <button
                   onClick={handleBuyVip}
-                  disabled={isBuyingVip || (user?.reward_points || 0) < 14400}
+                  disabled={isVip || isBuyingVip || (user?.reward_points || 0) < 14400}
                   className="w-full py-3 bg-yellow-400 text-gray-900 rounded-full font-bold hover:bg-yellow-300 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
                 >
                   {isBuyingVip && <Loader2 className="w-5 h-5 animate-spin" />}
-                  {(user?.reward_points || 0) >= 14400 ? "Buy VIP Now" : "Not Enough Points"}
+                  {isVip ? "Already VIP" : (user?.reward_points || 0) >= 14400 ? "Buy VIP Now": "Not Enough Points"}
                 </button>
               </div>
             )}

@@ -100,7 +100,7 @@ class UserController extends Controller
         }
 
         $user->reward_points -= $vipCost * 100;
-        $user->member_tier_id = 4;
+        $user->membership_tier_id = 'vip';
         $user->save();
 
         return response()->json([
