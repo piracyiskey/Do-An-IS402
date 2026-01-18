@@ -1,4 +1,6 @@
 // src/lib/googleAuth.js
+import api from "./api";
+
 const CONFIG = {
   // Cần đảm bảo các biến môi trường này đã được khai báo và có giá trị
   clientId: import.meta.env.VITE_GOOGLE_CLIENT_ID,
@@ -77,28 +79,16 @@ export const handleGoogleCallback = async () => {
     throw new Error('PKCE verifier missing');
   }
 
-  // Clean up
-  sessionStorage.removeItem('pkce_state');
-  sessionStorage.removeItem('pkce_verifier');
-
   // Send to Laravel backend để đổi code lấy access token
-  const response = await fetch(`${CONFIG.backendUrl}/auth/google/exchange`, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'Accept': 'application/json',
-    },
-    body: JSON.stringify({
-      code,
-      verifier, // <-- Gửi code_verifier để backend xác minh PKCE
-    }),
+  const response = await api.post(`${CONFIG.backendUrl}/auth/google/exchange`, {
+      code: code,
+      verifier: verifier,
   });
 
-  const data = await response.json();
 
-  if (!response.ok) {
-    throw new Error(data.error || 'Token exchange failed');
+  if (!response.data.success) {
+    throw new Error(response.data.error || 'Token exchange failed');
   }
 
-  return data; // { success: true, access_token, refresh_token }
+  return response; // { success: true, access_token, refresh_token }
 };

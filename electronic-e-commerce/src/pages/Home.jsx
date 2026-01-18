@@ -19,7 +19,6 @@ function Home() {
 
     useEffect(() => {
         const fetchHomeProducts = async () => {
-            setLoading(true);
             try {
                 const params = { limit: 4 };
                 const [resMobile, resTv, resComp] = await Promise.all([

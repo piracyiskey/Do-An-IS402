@@ -1,62 +1,91 @@
-// src/App.jsx (Đã sửa lỗi)
-import React from "react";
-// Đổi các imports cũ thành import Home mới
-import Home from "./pages/Home.jsx"; // Hoặc đường dẫn tương ứng
-import "./global.css"; // Giữ lại global CSS ở đây
+import React, { lazy, Suspense } from "react";
+import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
+import "./global.css";
+/* =======================
+   Lazy-loaded pages
+======================= */
 
-import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom"; 
-import Login from "./pages/Login.jsx";
-import SignUp from "./pages/SignUp.jsx";
-import Cart from "./pages/Cart.jsx";
-import Career from "./pages/Career";
-import AboutUs from "./pages/About_Us";
-import ContactUs from "./pages/Contact_Us";
-import DashBoard from "./pages/Dash_Board";
-import VerifiedEmail from "./pages/VerifiedEmail";
-import Profile from "./pages/Profile";
-import MyRewards from "./pages/MyRewards";
-import Checkout from "./pages/Checkout";
-import OrderSuccess from "./pages/OrderSuccess";
-import MyOrders from "./pages/MyOrders";
-import OrderDetail from "./pages/OrderDetail";
-import AdminDashboard from "./pages/AdminDashboard";
-import MobilePage from "./pages/MobilePage.jsx";
-import ShopPage from "./pages/ShopPage.jsx";
-import ProductDetailPage from "./pages/ProductDetailPage.jsx";
-import SearchResults from './components/SearchResults';
-import TVAVPage from "./pages/TV-AVPage.jsx";
-import ComputingPage from "./pages/ComputingPage.jsx";
+const Home = lazy(() => import("./pages/Home.jsx"));
+const Login = lazy(() => import("./pages/Login.jsx"));
+const SignUp = lazy(() => import("./pages/SignUp.jsx"));
+const Cart = lazy(() => import("./pages/Cart.jsx"));
+const Career = lazy(() => import("./pages/Career"));
+const AboutUs = lazy(() => import("./pages/About_Us"));
+const ContactUs = lazy(() => import("./pages/Contact_Us"));
+const DashBoard = lazy(() => import("./pages/Dash_Board"));
+const VerifiedEmail = lazy(() => import("./pages/VerifiedEmail"));
+const Profile = lazy(() => import("./pages/Profile"));
+const MyRewards = lazy(() => import("./pages/MyRewards"));
+const Checkout = lazy(() => import("./pages/Checkout"));
+const OrderSuccess = lazy(() => import("./pages/OrderSuccess"));
+const MyOrders = lazy(() => import("./pages/MyOrders"));
+const OrderDetail = lazy(() => import("./pages/OrderDetail"));
+const AdminDashboard = lazy(() => import("./pages/AdminDashboard"));
+const MobilePage = lazy(() => import("./pages/MobilePage.jsx"));
+const ShopPage = lazy(() => import("./pages/ShopPage.jsx"));
+const ProductDetailPage = lazy(() => import("./pages/ProductDetailPage.jsx"));
+const SearchResults = lazy(() => import("./components/SearchResults"));
+const TVAVPage = lazy(() => import("./pages/TV-AVPage.jsx"));
+const ComputingPage = lazy(() => import("./pages/ComputingPage.jsx"));
+const GoogleCallback = lazy(() => import("./pages/GoogleCallback.jsx"));
+
+/* =======================
+   App Component
+======================= */
 
 function App() {
+
   return (
     <Router>
-        <Routes> 
-            <Route path="/" element={<Home/>} />
-            <Route path="/login" element={<Login/>} />
-            <Route path="/signup" element={<SignUp/>} />
-            <Route path="/cart" element={<Cart/>} />
-            <Route path="/checkout" element={<Checkout/>} />
-            <Route path="/order-success" element={<OrderSuccess/>} />
-            <Route path="/my-orders" element={<MyOrders/>} />
-            <Route path="/order/:orderId" element={<OrderDetail/>} />
-            <Route path="/admin" element={<AdminDashboard/>} />
-            <Route path="/career" element={<Career/>} />
-            <Route path="/about-us" element={<AboutUs/>} />
-            <Route path="/contact-us" element={<ContactUs/>} />
-            <Route path="/dashboard" element={<DashBoard/>} />
-            <Route path="/verified_email" element={<VerifiedEmail/>} />
-            <Route path="/profile" element={<Profile/>} />
-            <Route path="/my-rewards" element={<MyRewards/>} />
-            <Route path="/mobile/:child_slug" element={<MobilePage />} />
-            <Route path="/mobile" element={<Navigate to="/mobile/galaxy-smartphone" replace />} />
-            <Route path="/tv-av/:child_slug" element={<TVAVPage />} />
-            <Route path="/tv-av" element={<Navigate to="/tv-av/premium-flagship-tvs" replace />} />
-            <Route path="/computing-displays/:child_slug" element={<ComputingPage />} />
-            <Route path="/computing-displays" element={<Navigate to="/computing-displays/galaxy-book-laptop" replace />} />
-            <Route path="/shop" element={<ShopPage/>}/>
-            <Route path="/product/:product_id" element={<ProductDetailPage />} />
-            <Route path="/resultsearch" element={<SearchResults />} />
-        </Routes> 
+      <Suspense
+        fallback={
+          <div className="min-h-screen flex items-center justify-center">
+            <div className="w-10 h-10 border-4 border-gray-300 border-t-blue-500 rounded-full animate-spin" />
+          </div>
+        }
+      >
+        <Routes>
+          <Route path="/" element={<Home />} />
+          <Route path="/login" element={<Login />} />
+          <Route path="/signup" element={<SignUp />} />
+          <Route path="/cart" element={<Cart />} />
+          <Route path="/checkout" element={<Checkout />} />
+          <Route path="/order-success" element={<OrderSuccess />} />
+          <Route path="/my-orders" element={<MyOrders />} />
+          <Route path="/order/:orderId" element={<OrderDetail />} />
+          <Route path="/admin" element={<AdminDashboard />} />
+          <Route path="/career" element={<Career />} />
+          <Route path="/about-us" element={<AboutUs />} />
+          <Route path="/contact-us" element={<ContactUs />} />
+          <Route path="/dashboard" element={<DashBoard />} />
+          <Route path="/verified_email" element={<VerifiedEmail />} />
+          <Route path="/profile" element={<Profile />} />
+          <Route path="/my-rewards" element={<MyRewards />} />
+
+          <Route path="/mobile/:child_slug" element={<MobilePage />} />
+          <Route
+            path="/mobile"
+            element={<Navigate to="/mobile/galaxy-smartphone" replace />}
+          />
+
+          <Route path="/tv-av/:child_slug" element={<TVAVPage />} />
+          <Route
+            path="/tv-av"
+            element={<Navigate to="/tv-av/premium-flagship-tvs" replace />}
+          />
+
+          <Route path="/computing-displays/:child_slug" element={<ComputingPage />} />
+          <Route
+            path="/computing-displays"
+            element={<Navigate to="/computing-displays/galaxy-book-laptop" replace />}
+          />
+
+          <Route path="/shop" element={<ShopPage />} />
+          <Route path="/product/:product_id" element={<ProductDetailPage />} />
+          <Route path="/resultsearch" element={<SearchResults />} />
+          <Route path="/auth/callback" element={<GoogleCallback />} />
+        </Routes>
+      </Suspense>
     </Router>
   );
 }

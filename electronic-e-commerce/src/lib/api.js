@@ -34,54 +34,34 @@ api.interceptors.request.use(
 
 // Response interceptor - xử lý refresh token
 api.interceptors.response.use(
-  (response) => {
-    // Nếu response có access_token mới (từ refresh), lưu lại
-    if (response.data?.access_token) {
-      localStorage.setItem("access_token", response.data.access_token);
-    }
-    return response;
-  },
-  async (error) => {
-    const originalRequest = error.config;
+  (response) => response,
+  (error) => {
+    const status = error?.response?.status;
+    const requestUrl = error?.config?.url || "";
 
-    // Nếu lỗi 401 và chưa retry
-    if (error.response?.status === 401 && !originalRequest._retry) {
-      originalRequest._retry = true;
+    // Normalize to pathname
+    const pathname = requestUrl.startsWith("http")
+      ? new URL(requestUrl).pathname
+      : requestUrl;
 
-      const refreshToken = localStorage.getItem("refresh_token");
+    const authApiUrls = ["/api/login", "/api/register", "/auth/callback"];
 
-      if (refreshToken) {
-        try {
-          // Gửi request với refresh token để lấy access token mới
-          const response = await axios.post(
-            `${API_BASE_URL}/login`,
-            {},
-            {
-              headers: {
-                "refresh-token": refreshToken,
-              },
-            }
-          );
-
-          if (response.data?.access_token) {
-            localStorage.setItem("access_token", response.data.access_token);
-            originalRequest.headers.Authorization = `Bearer ${response.data.access_token}`;
-            return api(originalRequest);
-          }
-        } catch (refreshError) {
-          // Refresh token cũng hết hạn, logout user
-          logout();
-          return Promise.reject(refreshError);
-        }
-      } else {
-        // Không có refresh token, logout
-        logout();
+    if (
+      status === 401 &&
+      !authApiUrls.includes(pathname)
+    ) {
+      // Redirect to FRONTEND login page
+      if (window.location.pathname !== "/login") {
+        window.location.replace("/login");
       }
     }
-
+    else if (status === 409) {
+      window.location.replace("/");
+    }
     return Promise.reject(error);
   }
 );
+
 
 // Hàm logout - xóa tokens và redirect
 export const logout = () => {
@@ -91,17 +71,19 @@ export const logout = () => {
   window.location.href = "/login";
 };
 
-// Hàm kiểm tra đã đăng nhập chưa
-export const isAuthenticated = () => {
-  return !!localStorage.getItem("access_token");
+export const isauthenticated = async () => {
+  const res = await api.get(`${API_BASE_URL}/login/`);
+  if (!res.status || res.status === 409) {
+    return false;
+  } 
+  return true;
 };
-
-// Hàm lấy user info từ localStorage
-export const getUser = () => {
-  const user = localStorage.getItem("user");
-  return user ? JSON.parse(user) : null;
-};
-
+export const tohomeifauthenticated = async () => {
+  const result = await isauthenticated();
+  if (result) {
+    window.location.href = "/";
+  }
+}
 export const ProductService = {
   // Gọi hàm getRecommendedProducts
   getRecommended: (limit = 10) => 
