@@ -2,6 +2,8 @@ import { useState } from "react";
 import { HelpCircle, Eye, EyeOff, Loader2 } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import { loginWithGoogle } from "../lib/googleAuth";
+import { isauthenticated } from "../lib/api";
+import { useLayoutEffect } from "react";
 import axios from "axios";
 
 const API_BASE_URL = import.meta.env.VITE_BACKEND_API_URL;
@@ -15,7 +17,16 @@ export default function Login() {
   const [rememberMe, setRememberMe] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
-
+  useLayoutEffect(() => {
+    const checkAuth = async () => {
+      const auth = await isauthenticated();
+      console.log("is authenticated:", auth);
+      if (auth) {
+        navigate("/");
+      }
+    };
+    checkAuth();
+  });
   const handleGoogleLogin = async () => {
     try {
       await loginWithGoogle();
@@ -54,12 +65,6 @@ export default function Login() {
         {
           email,
           password,
-        },
-        {
-          headers: {
-            "Content-Type": "application/json",
-            "Accept": "application/json",
-          },
         }
       );
 

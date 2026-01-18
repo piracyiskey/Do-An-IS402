@@ -1,7 +1,7 @@
 // src/components/HeroSection.js
 import React from "react";
 
-export default function HeroSection({ 
+export default function Home_Phone({ 
   bgImage, 
   title = "Galaxy Z Fold7", 
   subTitle = "Galaxy AI ✨" 
