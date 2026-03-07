@@ -136,14 +136,10 @@ const ProductDetail = () => {
           <div className="bg-[#f7f7f7] rounded-[40px] p-10 flex items-center justify-center aspect-square shadow-sm">
             <img 
               // Kết hợp URL Backend và image_url từ database
-              src={product.image_url ? `http://localhost:8000${product.image_url}` : "/placeholder.png"} 
+              src={product.image_url} 
               alt={product.product_name}
               className="max-w-full max-h-full object-contain mix-blend-multiply"
-              // CHẶN VÒNG LẶP VÔ TẬN (Sửa lỗi image_60ee2e.png)
-              onError={(e) => {
-                e.target.onerror = null; 
-                e.target.src = "/placeholder.png"; 
-              }}
+              // CHẶN VÒNG LẶP VÔ TẬN (Sửa lỗi image_60ee2e.png
             />
           </div>
 

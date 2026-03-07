@@ -5,7 +5,6 @@ import Card from "./Card";
 export default function CardSection({ sectionTitle, data }) {
     // Nếu data chưa kịp về (loading), có thể hiện một khung trống hoặc null
     if (!data) return null; 
-
     return (
         <section className="bg-white py-16 sm:py-24">
             <div className="container mx-auto px-4">

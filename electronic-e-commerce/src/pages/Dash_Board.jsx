@@ -21,33 +21,12 @@ function DashBoard() {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    // Kiểm tra đăng nhập
-    const accessToken = localStorage.getItem("access_token");
-    if (!accessToken) {
-      navigate("/login");
-      return;
-    }
-
     // Lấy thông tin user từ API
     const fetchUser = async () => {
       try {
         const response = await api.get("/auth/user");
         const userData = response.data.data || response.data;
         setUser(userData);
-        localStorage.setItem("user", JSON.stringify(userData));
-      } catch (error) {
-        // Nếu lỗi, thử lấy từ localStorage
-        const storedUser = localStorage.getItem("user");
-        if (storedUser) {
-          try {
-            setUser(JSON.parse(storedUser));
-          } catch (e) {
-            console.error("Error parsing user data", e);
-            navigate("/login");
-          }
-        } else {
-          navigate("/login");
-        }
       } finally {
         setIsLoading(false);
       }

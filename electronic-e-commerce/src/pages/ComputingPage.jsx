@@ -3,7 +3,7 @@ import axios from 'axios';
 import { useParams, useNavigate } from 'react-router-dom';
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
-
+const BASE_URL = import.meta.env.VITE_BACKEND_API_URL;
 const ComputingPage = () => {
     const { child_slug } = useParams();
     const navigate = useNavigate();
@@ -14,8 +14,6 @@ const ComputingPage = () => {
     const [errorMsg, setErrorMsg] = useState(null);
 
     // Cấu hình URL Backend
-    const BASE_URL = 'http://localhost:8000';
-    
     const [filters, setFilters] = useState({
         keyword: '',
         processor: [],
@@ -48,7 +46,7 @@ const ComputingPage = () => {
                 last_id: currentLastId
             };
 
-            const response = await axios.get(`${BASE_URL}/api/computing-displays/${child_slug}`, { params });
+            const response = await axios.get(`${BASE_URL}/computing-displays/${child_slug}`, { params });
             
             if (Array.isArray(response.data)) {
                 const data = response.data;
@@ -62,7 +60,7 @@ const ComputingPage = () => {
                     setFilters(prev => ({ ...prev, last_id: data[data.length - 1].product_id }));
                 }
             }
-        } catch (error) {
+        } catch {
             setErrorMsg("Không thể kết nối để tải danh sách sản phẩm.");
         } finally {
             setLoading(false);
@@ -76,7 +74,7 @@ const ComputingPage = () => {
         } else {
             fetchProducts(true);
         }
-    }, [child_slug, navigate]);
+    }, [child_slug, navigate, fetchProducts]);
 
     const toggleArrayFilter = (key, value) => {
         const current = [...filters[key]];
@@ -181,10 +179,9 @@ const ComputingPage = () => {
                                 >
                                     <div className="aspect-[4/3] w-full mb-6 relative rounded-2xl bg-gray-50 flex items-center justify-center overflow-hidden">
                                         <img 
-                                            src={`${BASE_URL}${product.image_url}`} 
+                                            src={`${product.image_url}`} 
                                             alt={product.product_name} 
                                             className="w-4/5 h-4/5 object-contain group-hover:scale-110 transition-transform duration-700" 
-                                            onError={(e) => { e.target.src = 'https://via.placeholder.com/400x300?text=Laptop'; }}
                                         />
                                     </div>
                                     

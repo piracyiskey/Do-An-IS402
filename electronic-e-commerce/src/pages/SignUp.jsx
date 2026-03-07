@@ -1,8 +1,7 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
-import { isauthenticated } from "../lib/api.js";
-import { useLayoutEffect } from "react";
+
 const API_BASE_URL = import.meta.env.VITE_BACKEND_API_URL;
 
 const SignUp = () => {
@@ -28,15 +27,6 @@ const SignUp = () => {
     label: '',
     color: ''
   });
-  useLayoutEffect(() => {
-      const checkAuth = async () => {
-        const auth = await isauthenticated();
-        if (auth) {
-          navigate("/");
-        }
-      };
-      checkAuth();
-    });
   // Email validation
   const validateEmail = (email) => {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;

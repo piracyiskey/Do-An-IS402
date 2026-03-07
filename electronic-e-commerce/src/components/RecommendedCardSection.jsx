@@ -8,12 +8,7 @@ export function RecommendedCard({
   productId,
   imageSrc = "https://via.placeholder.com/300x300",
   description,
-  price,
-  saveAmount,
-  originalPrice,
 }) {
-  const [imgError, setImgError] = useState(false);
-  const fallbackImg = "https://via.placeholder.com/300x300?text=No+Image";
 
   return (
     <Link to={`/product/${productId}`} className="group flex-shrink-0 w-[295px] flex flex-col cursor-pointer">
@@ -23,10 +18,9 @@ export function RecommendedCard({
                    group-hover:bg-white transition-all overflow-hidden shadow-md border border-gray-100 relative"
       >
         <img
-          src={imgError ? fallbackImg : imageSrc}
+          src={imageSrc}
           alt={description}
           className="max-w-[85%] max-h-[85%] object-contain relative z-10 transition-transform duration-500 group-hover:scale-105"
-          onError={() => setImgError(true)}
         />
       </div>
 
@@ -41,17 +35,9 @@ export function RecommendedCard({
 
         <div className="mt-auto">
           <div className="flex items-baseline gap-2 flex-wrap">
-            {saveAmount > 0 && (
-              <span className="text-sm font-medium" style={{ fontFamily: "Inter, sans-serif", color: "#00a9a5" }}>
-                Save ${saveAmount}
-              </span>
-            )}
+            
           </div>
-          {originalPrice && (
-            <p className="text-sm line-through mt-0.5" style={{ fontFamily: "Inter, sans-serif", color: "#999" }}>
-              ${originalPrice}
-            </p>
-          )}
+          
         </div>
       </div>
     </Link>
@@ -70,33 +56,10 @@ export default function RecommendedCardSection() {
     const fetchProducts = async () => {
       try {
         const response = await api.get("/products/recommended?limit=12");
-        const data = response.data.data || response.data || [];
-        const imageBaseUrl = import.meta.env.VITE_BACKEND_API_URL?.replace("/api", "") || "http://localhost:8000";
+        const data = response.data || [];
+        
 
-        const mappedProducts = data.map((product) => {
-          let imageSrc = "https://via.placeholder.com/300x300";
-          if (product.image_url) {
-            imageSrc = product.image_url.startsWith("http")
-              ? product.image_url
-              : `${imageBaseUrl}${product.image_url}`;
-          } else if (product.thumbnail) {
-            imageSrc = product.thumbnail.startsWith("http")
-              ? product.thumbnail
-              : `${imageBaseUrl}${product.thumbnail}`;
-          }
-
-          return {
-            id: product.product_id || product.id,
-            imageSrc,
-            description: product.product_name || product.name,
-            // SỬA LỖI GIÁ: Ưu tiên lấy 'price' trước, sau đó mới đến các thuộc tính khác
-            price: product.price || product.min_price || null,
-            saveAmount: product.discount_amount || 0,
-            originalPrice: product.original_price || null,
-          };
-        });
-
-        setProducts(mappedProducts);
+        setProducts(data);
       } catch (error) {
         console.error("Error fetching recommended products:", error);
         setProducts([]);
@@ -167,13 +130,10 @@ export default function RecommendedCardSection() {
         >
           {products.map((product) => (
             <RecommendedCard
-              key={product.id}
-              productId={product.id}
-              imageSrc={product.imageSrc}
-              description={product.description}
-              price={product.price}
-              saveAmount={product.saveAmount}
-              originalPrice={product.originalPrice}
+              key={product.product_id}
+              productId={product.product_id}
+              imageSrc={product.image_url}
+              description={product.alt_text}
             />
           ))}
         </div>

@@ -312,12 +312,6 @@ const MyOrders = () => {
   // Fetch orders
   useEffect(() => {
     const fetchOrders = async () => {
-      const accessToken = localStorage.getItem("access_token");
-      if (!accessToken) {
-        navigate("/login");
-        return;
-      }
-
       try {
         const response = await api.get("/auth/getallorder");
         if (response.data.orders) {
@@ -355,7 +349,7 @@ const MyOrders = () => {
   // Filter orders
   const filteredOrders = orders.filter((order) => {
     if (filter === "all") return true;
-    if (filter === "pending") return order.status?.toLowerCase() === "pending";
+    if (filter === "pending") return order.payment_status?.toLowerCase() === "pending";
     if (filter === "processing") return order.status?.toLowerCase() === "processing";
     if (filter === "completed")
       return order.status?.toLowerCase() === "completed" || order.status?.toLowerCase() === "delivered";

@@ -153,7 +153,6 @@ const OrderDetailModal = ({ order, items, onClose, onVerifyPayment, isVerifying 
 
 const AdminDashboard = () => {
   const navigate = useNavigate();
-  const [user, setUser] = useState(null);
   const [orders, setOrders] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isAdmin, setIsAdmin] = useState(false);
@@ -162,7 +161,6 @@ const AdminDashboard = () => {
   // Modal state
   const [selectedOrder, setSelectedOrder] = useState(null);
   const [selectedItems, setSelectedItems] = useState([]);
-  const [isLoadingDetail, setIsLoadingDetail] = useState(false);
   const [isVerifying, setIsVerifying] = useState(false);
 
   // Check admin and fetch orders
@@ -179,8 +177,6 @@ const AdminDashboard = () => {
       if (storedUser) {
         try {
           const userData = JSON.parse(storedUser);
-          setUser(userData);
-          
           if (userData.email !== ADMIN_EMAIL) {
             setIsAdmin(false);
             setIsLoading(false);
@@ -212,17 +208,14 @@ const AdminDashboard = () => {
 
   // View order detail
   const handleViewOrder = async (orderId) => {
-    setIsLoadingDetail(true);
     try {
       const response = await api.get(`/auth/admin/order/${orderId}`);
       if (response.data.success) {
         setSelectedOrder(response.data.order);
         setSelectedItems(response.data.items || []);
       }
-    } catch (error) {
+    } catch{
       alert("Failed to load order details");
-    } finally {
-      setIsLoadingDetail(false);
     }
   };
 
@@ -289,19 +282,7 @@ const AdminDashboard = () => {
     return buckets;
   };
 
-  const getPaymentStatusCounts = (ordersList) => {
-    const counts = { paid: 0, pending: 0, other: 0 };
-    ordersList.forEach(o => {
-      const s = (o.payment_status || '').toLowerCase();
-      if (s === 'paid') counts.paid++;
-      else if (s === 'pending') counts.pending++;
-      else counts.other++;
-    });
-    return counts;
-  };
-
   const monthlyRevenue = getMonthlyRevenue(orders, 6);
-  const paymentCounts = getPaymentStatusCounts(orders);
 
   // Product type revenue (for donut) - compute from order items, fetch details when needed
   const [productTypeRevenue, setProductTypeRevenue] = useState([]);

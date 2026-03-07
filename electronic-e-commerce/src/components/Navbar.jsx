@@ -52,10 +52,10 @@ const ACCOUNT_MENU = [
 // ============================================
 // COMPONENT: MegaMenuDropdown
 // ============================================
-
+const BASE_URL = import.meta.env.VITE_BACKEND_API_URL;
 function MegaMenuDropdown({ menuKey, isVisible }) {
   const [apiProducts, setApiProducts] = useState([]);
-  const BASE_URL = 'http://localhost:8000';
+  
 
   // Khai báo lại các biến logic để render mà không thêm biến vào prop
   const dataKey = menuKey === "TV-AV" ? "TVAV" : menuKey;
@@ -82,10 +82,10 @@ function MegaMenuDropdown({ menuKey, isVisible }) {
 
     const fetchDropdownData = async () => {
       let endpoint = "";
-      if (menuKey === "Shop") endpoint = "/api/products/search";
-      else if (menuKey === "Mobile") endpoint = "/api/mobile/galaxy-smartphone";
-      else if (menuKey === "TV-AV") endpoint = "/api/tv-av/premium-flagship-tvs";
-      else if (menuKey === "Computing-Displays") endpoint = "/api/computing-displays/galaxy-book-laptop";
+      if (menuKey === "Shop") endpoint = "/products/search";
+      else if (menuKey === "Mobile") endpoint = "/mobile/galaxy-smartphone";
+      else if (menuKey === "TV-AV") endpoint = "/tv-av/premium-flagship-tvs";
+      else if (menuKey === "Computing-Displays") endpoint = "/computing-displays/galaxy-book-laptop";
 
       if (endpoint) {
         try {
@@ -135,10 +135,9 @@ function MegaMenuDropdown({ menuKey, isVisible }) {
                   <Link to={`/product/${item.product_id}`} key={index} 
                         className="flex flex-col items-center justify-center text-center cursor-pointer hover:opacity-75 transition-opacity">
                     <img 
-                      src={`${BASE_URL}${item.image_url}`} 
+                      src={`${item.image_url}`} 
                       alt={item.product_name} 
                       className="w-16 h-16 object-contain mb-2" 
-                      onError={(e) => { e.target.src = 'https://via.placeholder.com/64'; }}
                     />
                     <p className="text-[10px] font-semibold text-gray-800 line-clamp-2">{item.product_name}</p>
                   </Link>
@@ -196,7 +195,9 @@ function UserAccountPopup({ isVisible, userName, menuItems, handleLogout, onMous
     <div className="absolute top-12 right-0 w-[280px] bg-white shadow-2xl rounded-2xl p-6 transform origin-top-right transition-all duration-300 ease-out z-50 font-sans" onMouseEnter={onMouseEnter} onMouseLeave={onMouseLeave}>
       <div className="flex items-center gap-3 mb-4">
         <div className="p-2 bg-gray-100 rounded-full"><User className="w-6 h-6 text-black" /></div>
-        <span className="font-bold text-lg text-black">{userName}</span>
+        <span className="font-bold text-lg text-black break-all">
+        {userName}
+      </span>
       </div>
       <div className="flex justify-between items-center py-3 border-b border-gray-200 mb-3 cursor-pointer group">
          <div className="text-sm font-medium text-gray-800 group-hover:text-blue-600 leading-tight pr-2">Exclusive benefits with Samsung Account</div>
@@ -237,10 +238,8 @@ export default function Navbar({ isTransparent = true }) {
       try {
         const parsedUser = JSON.parse(storedUser);
         setUserName(parsedUser.full_name || parsedUser.name || parsedUser.email || "");
-        const roles = parsedUser.roles || parsedUser.role || [];
-        const hasAdminRole = Array.isArray(roles) ? roles.includes('admin') : (roles === 'admin');
-        setIsAdminUser(hasAdminRole || parsedUser.email === 'remembermyname2k5@gmail.com');
-      } catch (e) { setUserName(""); }
+        setIsAdminUser(parsedUser.email === 'remembermyname2k5@gmail.com');
+      } catch { setUserName(""); }
     } else { setUserName(""); }
   };
 

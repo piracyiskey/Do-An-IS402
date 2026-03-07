@@ -14,7 +14,7 @@ const MobilePage = () => {
     const [errorMsg, setErrorMsg] = useState(null);
 
     // 1. Định nghĩa BASE_URL để dùng cho cả API và Ảnh
-    const BASE_URL = 'http://localhost:8000';
+    const BASE_URL = import.meta.env.VITE_BACKEND_API_URL;
     
     const [filters, setFilters] = useState({
         keyword: '',
@@ -43,7 +43,7 @@ const MobilePage = () => {
             };
 
             // 2. Sử dụng BASE_URL trong lời gọi API
-            const response = await axios.get(`${BASE_URL}/api/mobile/${child_slug}`, { params });
+            const response = await axios.get(`${BASE_URL}/mobile/${child_slug}`, { params });
             
             if (Array.isArray(response.data)) {
                 const data = response.data;
@@ -183,10 +183,9 @@ const MobilePage = () => {
                                     <div className="aspect-square w-full mb-6 relative rounded-2xl bg-gray-50 p-6 overflow-hidden">
                                         <img 
                                             // 3. FIX: Nối BASE_URL vào ảnh
-                                            src={`${BASE_URL}${product.image_url}`} 
+                                            src={`${product.image_url}`} 
                                             alt={product.product_name} 
                                             className="w-full h-full object-contain group-hover:scale-110 transition-transform duration-700" 
-                                            onError={(e) => { e.target.src = 'https://via.placeholder.com/300?text=No+Image'; }}
                                         />
                                     </div>
                                     

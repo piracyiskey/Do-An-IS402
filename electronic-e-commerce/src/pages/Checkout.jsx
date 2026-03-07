@@ -181,14 +181,7 @@ const Checkout = () => {
   // Fetch cart and user data
   useEffect(() => {
     const fetchData = async () => {
-      const accessToken = localStorage.getItem("access_token");
       const storedUser = localStorage.getItem("user");
-
-      if (!accessToken) {
-        navigate("/login");
-        return;
-      }
-
       if (storedUser) {
         try {
           const userData = JSON.parse(storedUser);
@@ -264,7 +257,7 @@ const Checkout = () => {
         alert("Invalid promo code");
       }
     } catch (error) {
-      alert(error.response?.data?.message || "Invalid promo code");
+      alert(error.response?.data?.message ||"Invalid promo code");
     } finally {
       setIsApplyingPromo(false);
     }

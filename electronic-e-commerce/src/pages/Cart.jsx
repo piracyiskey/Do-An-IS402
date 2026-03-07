@@ -113,13 +113,10 @@ const BASE_URL = 'http://localhost:8000';
         <div className="w-24 h-24 flex-shrink-0 bg-gray-50 rounded-lg flex items-center justify-center">
           <img
             // SỬA DÒNG NÀY: Nối BASE_URL với đường dẫn từ API
-            src={item.image_url ? `${BASE_URL}${item.image_url}` : "https://via.placeholder.com/100x100?text=Product"}
+            src={`${item.image_url}`}
             alt={item.product_name}
             className="max-w-full max-h-full object-contain"
-            onError={(e) => {
-              e.target.onerror = null;
-              e.target.src = "https://via.placeholder.com/100x100?text=No+Image";
-            }}
+            
           />
         </div>
 
@@ -211,9 +208,6 @@ const BASE_URL = 'http://localhost:8000';
           <div className="flex gap-8 mt-4 text-sm text-gray-600">
             <div className="flex items-center gap-2">
               <span>📦</span>
-              <span>
-                Delivers to: <span className="text-blue-600">10001</span>
-              </span>
             </div>
             <div className="flex items-center gap-2">
               <span>🏪</span>
@@ -228,7 +222,6 @@ const BASE_URL = 'http://localhost:8000';
 
 // Order Summary Component
 const OrderSummary = ({ subtotal, discount, promoCode, onApplyPromo, promoInput, setPromoInput, isApplyingPromo, user }) => {
-  const shipping = 0; // Free shipping
   const total = subtotal - discount;
   const rewardPoints = Math.floor(total * 2); // 2 points per dollar
 
@@ -366,7 +359,6 @@ const OrderSummary = ({ subtotal, discount, promoCode, onApplyPromo, promoInput,
 };
 
 const Cart = () => {
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [user, setUser] = useState(null);
   const [cartItems, setCartItems] = useState([]);
   const [totalPrice, setTotalPrice] = useState(0);
@@ -378,15 +370,14 @@ const Cart = () => {
   const [isApplyingPromo, setIsApplyingPromo] = useState(false);
 
   const isCartEmpty = cartItems.length === 0;
-
   // Fetch cart data
   const fetchCart = async () => {
     try {
       const data = await getCart();
-      console.log("Cart data:", data);
       if (data.success && data.data && data.data.length > 0) {
         setCartItems(data.data);
         setTotalPrice(data.total_price || 0);
+        setUser(JSON.parse(localStorage.getItem("user")) || null);
       } else {
         setCartItems([]);
         setTotalPrice(0);
@@ -402,20 +393,7 @@ const Cart = () => {
   };
 
   useEffect(() => {
-    const accessToken = localStorage.getItem("access_token");
-    const storedUser = localStorage.getItem("user");
-
-    if (accessToken && storedUser) {
-      setIsLoggedIn(true);
-      try {
-        setUser(JSON.parse(storedUser));
-      } catch (e) {
-        console.error("Error parsing user", e);
-      }
-      fetchCart();
-    } else {
-      setIsLoading(false);
-    }
+    fetchCart();
   }, []);
 
   // Remove item
@@ -573,26 +551,12 @@ const Cart = () => {
           <div className="max-w-3xl mx-auto flex flex-col items-center text-center py-10 flex-grow -mt-12">
             <div className="mt-10 mb-8">
               <h2 className="text-3xl font-bold mb-4">Your cart is empty</h2>
-              {isLoggedIn ? (
+              
                 <p className="text-base text-gray-600">
                   Hi {user?.full_name || user?.email}! You haven't added any items to your cart yet.
                 </p>
-              ) : (
-                <p className="text-base text-gray-600">Sign in to see if you have saved some items in cart.</p>
-              )}
+        
             </div>
-
-            {!isLoggedIn && (
-              <Link to="/login">
-                <button
-                  className="h-11 w-64 rounded-full transition-all duration-200 font-medium text-sm flex items-center justify-center cursor-pointer border-none outline-none mb-4"
-                  style={{ backgroundColor: "#3b82f6", color: "white" }}
-                >
-                  Sign In
-                </button>
-              </Link>
-            )}
-
             <Link to="/shop">
               <p className="text-sm text-blue-600 hover:underline cursor-pointer">Continue Shopping</p>
             </Link>
