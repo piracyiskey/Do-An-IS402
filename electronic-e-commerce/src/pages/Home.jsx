@@ -6,29 +6,30 @@ import HeroSection from "../components/HeroSection.jsx";
 import Home_Phone from "../components/Home_Phone.jsx";
 import CardSection from "../components/CardSection.jsx";
 import RecommendedCardSection from "../components/RecommendedCardSection.jsx";
-
+const BASE_URL = import.meta.env.VITE_BACKEND_API_URL;
 function Home() {
     const [mobiles, setMobiles] = useState([]);
     const [tvs, setTvs] = useState([]);
     const [computing, setComputing] = useState([]);
     const [loading, setLoading] = useState(true);
 
-    const BASE_URL = 'http://localhost:8000';
+    
     // Link đúng của bạn: http://localhost:8000/images/products/1.webp
-    const IMAGE_PATH = `${BASE_URL}/images/products`;
+    const IMAGE_PATH = `/images/products`;
 
     useEffect(() => {
         const fetchHomeProducts = async () => {
             try {
                 const params = { limit: 4 };
                 const [resMobile, resTv, resComp] = await Promise.all([
-                    axios.get(`${BASE_URL}/api/mobile/galaxy-smartphone`, { params }), 
-                    axios.get(`${BASE_URL}/api/tv-av/premium-flagship-tvs`, { params }), 
-                    axios.get(`${BASE_URL}/api/computing-displays/galaxy-book-laptop`, { params })
+                    axios.get(`${BASE_URL}/mobile/galaxy-smartphone`, { params }), 
+                    axios.get(`${BASE_URL}/tv-av/premium-flagship-tvs`, { params }), 
+                    axios.get(`${BASE_URL}/computing-displays/galaxy-book-laptop`, { params })
                 ]);
                 setMobiles(Array.isArray(resMobile.data) ? resMobile.data : []);
                 setTvs(Array.isArray(resTv.data) ? resTv.data : []);
                 setComputing(Array.isArray(resComp.data) ? resComp.data : []);
+                
             } catch (error) {
                 console.error("Lỗi fetch dữ liệu:", error);
             } finally {
@@ -58,24 +59,14 @@ function Home() {
                 ) : (
                     <>
                         <Home_Phone
-                          bgImage={`${IMAGE_PATH}/1.webp`} // Đúng link bạn đưa
+                          bgImage={`${IMAGE_PATH}/galaxy-z-fold7-features-kv.jpg`} // Đúng link bạn đưa
                           title=""
                           subTitle=""
                         />
                         <CardSection sectionTitle="Mobile Galaxy" data={mobiles} />
-
-                        <Home_Phone
-                          bgImage={`${IMAGE_PATH}/2.jpg`} // Đảm bảo Backend có file 2.jpg
-                          title=""
-                          subTitle=""
-                        />
+                
                         <CardSection sectionTitle="Smart TV & Audio" data={tvs} />
 
-                        <Home_Phone
-                          bgImage={`${IMAGE_PATH}/3.jpg`} // Đảm bảo Backend có file 3.jpg
-                          title=""
-                          subTitle=""
-                        />  
                         <CardSection sectionTitle="Computing & Displays" data={computing} />
                     </>
                 )}

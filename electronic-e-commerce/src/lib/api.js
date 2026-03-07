@@ -11,20 +11,48 @@ const api = axios.create({
   },
 });
 
+export const tryRefreshToken = async () => {
+  const response = await axios.get(`${API_BASE_URL}/refresh`, {
+    headers: {
+      Authorization: `Bearer ${localStorage.getItem("access_token")}`,
+      "refresh-token": localStorage.getItem("refresh_token"),
+    }
+  });
+  if (response.status === 200 && response.data.access_token) {
+    localStorage.setItem("access_token", response.data.access_token);
+  }
+  if (response.status === 200 && response.data.refresh_token) {
+    localStorage.setItem("refresh_token", response.data.refresh_token);
+  }
+  if (response.status === 200 && response.data.user) {
+    localStorage.setItem("user", JSON.stringify(response.data.user));
+  }
+}
+
 // Request interceptor - thêm access token vào mỗi request
 api.interceptors.request.use(
-  (config) => {
-    const accessToken = localStorage.getItem("access_token");
+  async (config) => {
+
+    const user = JSON.parse(localStorage.getItem("user"));
+    var accessToken = localStorage.getItem("access_token");
+    
+    if (user && user.exp_unix && Math.floor(Date.now() / 1000) >= user.exp_unix) {
+       try {
+          await tryRefreshToken();
+       } catch (error) {
+          if (error.response && error.response.status === 401) {
+            console.error("Token refresh failed", error);
+            localStorage.removeItem("access_token");
+            localStorage.removeItem("refresh_token");
+            localStorage.removeItem("user");
+          }
+          return Promise.reject(error);
+       }
+    }
+    accessToken = localStorage.getItem("access_token");
     if (accessToken) {
       config.headers.Authorization = `Bearer ${accessToken}`;
     }
-
-    // Thêm refresh token vào header
-    const refreshToken = localStorage.getItem("refresh_token");
-    if (refreshToken) {
-      config.headers["refresh-token"] = refreshToken;
-    }
-
     return config;
   },
   (error) => {
@@ -34,25 +62,38 @@ api.interceptors.request.use(
 
 // Response interceptor - xử lý refresh token
 api.interceptors.response.use(
-  (response) => response,
+  (response) => {
+    const user = response.data.user;
+    const accessToken = response.data.access_token;
+    if (accessToken && (!user || Object.keys(user).length === 0)) {
+      alert("Khong co thong tin cua nguoi dung. Vui lòng đăng nhập lại.");
+      localStorage.removeItem("access_token");
+      localStorage.removeItem("user");
+      window.location.replace("/login");
+    }
+    if (user) {
+      localStorage.setItem("user", JSON.stringify(user));
+    }
+    if (response.status === 200 && response.data.access_token) {
+      localStorage.setItem("access_token", response.data.access_token);
+    }
+    if (response.status === 200 && response.data.refresh_token) {
+      localStorage.setItem("refresh_token", response.data.refresh_token);
+    }
+    
+    return response;
+  },
   (error) => {
     const status = error?.response?.status;
-    const requestUrl = error?.config?.url || "";
+    const authUrls = ["/login", "/signup", "/auth/callback"];
+    if (status === 401) {
+      localStorage.removeItem("access_token");
+      localStorage.removeItem("refresh_token");
+      localStorage.removeItem("user");
 
-    // Normalize to pathname
-    const pathname = requestUrl.startsWith("http")
-      ? new URL(requestUrl).pathname
-      : requestUrl;
-
-    const authApiUrls = ["/api/login", "/api/register", "/auth/callback"];
-
-    if (
-      status === 401 &&
-      !authApiUrls.includes(pathname)
-    ) {
-      // Redirect to FRONTEND login page
-      if (window.location.pathname !== "/login") {
+      if (!authUrls.includes(window.location.pathname)) {
         window.location.replace("/login");
+        localStorage.setItem("returnUrl", window.location.pathname);
       }
     }
     else if (status === 409) {
@@ -68,22 +109,10 @@ export const logout = () => {
   localStorage.removeItem("access_token");
   localStorage.removeItem("refresh_token");
   localStorage.removeItem("user");
-  window.location.href = "/login";
+  window.location.href = "/";
 };
 
-export const isauthenticated = async () => {
-  const res = await api.get(`${API_BASE_URL}/login/`);
-  if (!res.status || res.status === 409) {
-    return false;
-  } 
-  return true;
-};
-export const tohomeifauthenticated = async () => {
-  const result = await isauthenticated();
-  if (result) {
-    window.location.href = "/";
-  }
-}
+
 export const ProductService = {
   // Gọi hàm getRecommendedProducts
   getRecommended: (limit = 10) => 

@@ -4,7 +4,8 @@ import "./global.css";
 /* =======================
    Lazy-loaded pages
 ======================= */
-
+import AuthenticatedRoute from "./pages/AuthenticatedRoute.jsx";
+import AuthRoute from "./pages/AuthRoute.jsx";
 const Home = lazy(() => import("./pages/Home.jsx"));
 const Login = lazy(() => import("./pages/Login.jsx"));
 const SignUp = lazy(() => import("./pages/SignUp.jsx"));
@@ -44,24 +45,33 @@ function App() {
           </div>
         }
       >
+        
         <Routes>
           <Route path="/" element={<Home />} />
-          <Route path="/login" element={<Login />} />
-          <Route path="/signup" element={<SignUp />} />
-          <Route path="/cart" element={<Cart />} />
-          <Route path="/checkout" element={<Checkout />} />
-          <Route path="/order-success" element={<OrderSuccess />} />
-          <Route path="/my-orders" element={<MyOrders />} />
-          <Route path="/order/:orderId" element={<OrderDetail />} />
-          <Route path="/admin" element={<AdminDashboard />} />
+          <Route element={<AuthRoute />}>
+            <Route path="/login" element={<Login />} />
+            <Route path="/signup" element={<SignUp />} />
+            <Route path="/auth/callback" element={<GoogleCallback />} />
+          </Route>
+          
+          
+          <Route element={<AuthenticatedRoute />}>
+            <Route path="/dashboard" element={<DashBoard />} />
+            <Route path="/profile" element={<Profile />} />
+            <Route path="/my-rewards" element={<MyRewards />} />
+            <Route path="/cart" element={<Cart />} />
+            <Route path="/checkout" element={<Checkout />} />
+            <Route path="/order-success" element={<OrderSuccess />} />
+            <Route path="/my-orders" element={<MyOrders />} />
+            <Route path="/order/:orderId" element={<OrderDetail />} />
+            <Route path="/admin" element={<AdminDashboard />} />
+          </Route>
+
+
+          <Route path="/contact-us" element={<ContactUs />} />
+          <Route path="/verified_email" element={<VerifiedEmail />} />
           <Route path="/career" element={<Career />} />
           <Route path="/about-us" element={<AboutUs />} />
-          <Route path="/contact-us" element={<ContactUs />} />
-          <Route path="/dashboard" element={<DashBoard />} />
-          <Route path="/verified_email" element={<VerifiedEmail />} />
-          <Route path="/profile" element={<Profile />} />
-          <Route path="/my-rewards" element={<MyRewards />} />
-
           <Route path="/mobile/:child_slug" element={<MobilePage />} />
           <Route
             path="/mobile"
@@ -83,7 +93,6 @@ function App() {
           <Route path="/shop" element={<ShopPage />} />
           <Route path="/product/:product_id" element={<ProductDetailPage />} />
           <Route path="/resultsearch" element={<SearchResults />} />
-          <Route path="/auth/callback" element={<GoogleCallback />} />
         </Routes>
       </Suspense>
     </Router>

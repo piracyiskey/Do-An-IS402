@@ -73,7 +73,7 @@ const Search = () => {
                     onClick={() => { navigate(`/product/${item.product_id}`); setShowDropdown(false); }}
                     className="flex items-start gap-4 p-4 hover:bg-blue-50 cursor-pointer border-b border-gray-50 last:border-none"
                   >
-                    <img src={`http://localhost:8000${item.image_url}`} className="w-14 h-14 object-contain" alt="" />
+                    <img src={`${item.image_url}`} className="w-14 h-14 object-contain" alt="" />
                     <div className="flex-1">
                       <p className="text-sm font-bold text-gray-800 leading-tight whitespace-normal break-words">{item.product_name}</p>
                       <p className="text-sm text-blue-600 font-bold">{formatCurrency(item.sale_price || item.base_price)}</p>

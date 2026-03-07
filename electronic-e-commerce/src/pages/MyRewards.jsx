@@ -28,7 +28,12 @@ export default function MyRewards() {
         const response = await api.get("/auth/user");
         const userData = response.data.data || response.data;
         setUser(userData);
-        localStorage.setItem("user", JSON.stringify(userData));
+        var staleUser = JSON.parse(localStorage.getItem("user"));
+        const updatedUser = {
+          ...staleUser,
+          ...userData
+        };
+        localStorage.setItem("user", JSON.stringify(updatedUser));
 
         // Fetch promotion codes
         try {

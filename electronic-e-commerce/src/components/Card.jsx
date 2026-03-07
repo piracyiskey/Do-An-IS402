@@ -2,17 +2,13 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import BuyNowButton from './BuyNowButton';
-
+const BASE_URL = import.meta.env.VITE_BACKEND_API_URL;
 const Card = ({ title, imageSrc, productId }) => {
   const navigate = useNavigate();
-  const BASE_URL = 'http://localhost:8000';
-  const fallbackImage = "https://via.placeholder.com/295x350?text=Samsung+Galaxy";
+  
 
-  const fullImageSrc = imageSrc 
-    ? (imageSrc.startsWith('http') ? imageSrc : `${BASE_URL}${imageSrc}`) 
-    : fallbackImage;
-
-  return (
+  const fullImageSrc = imageSrc;
+    return (
     <div 
       className="group w-[295px] h-[380px] bg-white relative overflow-hidden shadow-md cursor-pointer border border-gray-100 transition-all duration-500 hover:shadow-xl flex-shrink-0 flex flex-col"
       onClick={() => productId && navigate(`/product/${productId}`)}
@@ -31,10 +27,6 @@ const Card = ({ title, imageSrc, productId }) => {
           alt={title} 
           // Cố định chiều cao ảnh để Card trông đều nhau
           className="max-w-full max-h-[180px] object-contain transition-transform duration-700 group-hover:scale-105" 
-          onError={(e) => {
-            e.target.onerror = null; 
-            e.target.src = fallbackImage;
-          }}
         />
       </div>
       

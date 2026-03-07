@@ -47,6 +47,7 @@ const ShopPage = () => {
             
             if (Array.isArray(response.data)) {
                 const data = response.data;
+                console.log("Fetched products:", data);
                 if (isRefresh) setProducts(data);
                 else setProducts(prev => [...prev, ...data]);
 
@@ -190,10 +191,9 @@ const ShopPage = () => {
                                     <div className="aspect-square w-full mb-6 relative rounded-2xl bg-gray-50 p-6 overflow-hidden">
                                         <img 
                                             // FIX: Nối thêm BASE_URL vào đây để hiện ảnh
-                                            src={`${BASE_URL}${product.image_url}`} 
+                                            src={`${product.image_url}`} 
                                             alt={product.product_name} 
                                             className="w-full h-full object-contain group-hover:scale-110 transition-transform duration-700" 
-                                            onError={(e) => { e.target.src = 'https://via.placeholder.com/300?text=No+Image'; }}
                                         />
                                     </div>
                                     

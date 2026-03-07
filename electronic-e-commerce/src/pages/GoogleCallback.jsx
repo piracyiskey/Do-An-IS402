@@ -7,23 +7,13 @@ export default function GoogleCallback() {
 
   useEffect(() => {
     async function processGoogleCallback() {
-      try {
-        const res = await handleGoogleCallback();
-        if (res?.data?.access_token) {
-          localStorage.setItem("access_token", res.data.access_token);
-        }
-        if (res?.data?.refresh_token) {
-          localStorage.setItem("refresh_token", res.data.refresh_token);
-        }
-        if (!res?.data?.refresh_token && !res?.data?.access_token) {
+      const res = await handleGoogleCallback();
+        if (!res.data.success) {
+          console.error("Google callback failed:", res.error);
           navigate("/login", { replace: true });
-          return;
+        } else {
+          navigate(localStorage.getItem("redirectUrl") || "/", { replace: true });
         }
-        navigate("/", { replace: true });
-      } catch (error) {
-        console.error("Google callback failed:", error);
-        navigate("/login", { replace: true });
-      }
     }
 
     processGoogleCallback();

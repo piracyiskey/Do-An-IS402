@@ -14,7 +14,7 @@ const TVAVPage = () => {
     const [errorMsg, setErrorMsg] = useState(null);
 
     // 1. Cấu hình BASE_URL đồng bộ với Backend
-    const BASE_URL = 'http://localhost:8000';
+    const BASE_URL = import.meta.env.VITE_BACKEND_API_URL;
     
     const [filters, setFilters] = useState({
         keyword: '',
@@ -42,7 +42,7 @@ const TVAVPage = () => {
                 last_id: currentLastId
             };
 
-            const response = await axios.get(`${BASE_URL}/api/tv-av/${child_slug}`, { params });
+            const response = await axios.get(`${BASE_URL}/tv-av/${child_slug}`, { params });
             
             if (Array.isArray(response.data)) {
                 const data = response.data;
@@ -190,10 +190,9 @@ const TVAVPage = () => {
                                     <div className="aspect-video w-full mb-6 relative rounded-2xl bg-gray-50 flex items-center justify-center overflow-hidden">
                                         <img 
                                             // 2. FIX: Nối BASE_URL vào ảnh
-                                            src={`${BASE_URL}${product.image_url}`} 
+                                            src={`${product.image_url}`} 
                                             alt={product.product_name} 
                                             className="w-4/5 h-4/5 object-contain group-hover:scale-110 transition-transform duration-700" 
-                                            onError={(e) => { e.target.src = 'https://via.placeholder.com/600x400?text=TV+Image'; }}
                                         />
                                     </div>
                                     
