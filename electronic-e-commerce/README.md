@@ -1,16 +1,99 @@
-# React + Vite
+# Electronic E-Commerce Frontend
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+React + Vite e-commerce frontend application with Docker support.
 
-Currently, two official plugins are available:
+## 🚀 Quick Start
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+### Using Docker (Recommended)
 
-## React Compiler
+```bash
+# Create .env file
+cp .env.example .env  # Or create manually
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+# Start development server
+docker-compose up
 
-## Expanding the ESLint configuration
+# Access at http://localhost:5173
+```
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+### Using npm directly
+
+```bash
+# Install dependencies
+npm install
+
+# Start dev server
+npm run dev
+```
+
+## 🐳 Docker Commands
+
+```bash
+# Start (foreground with logs)
+docker-compose up
+
+# Start (background)
+docker-compose up -d
+
+# Stop
+docker-compose down
+
+# Rebuild after changes
+docker-compose build --no-cache
+
+# View logs
+docker-compose logs -f
+
+# Access container shell
+docker-compose exec frontend sh
+```
+
+## 📦 Available Scripts
+
+- `npm run dev` - Start development server
+- `npm run build` - Build for production
+- `npm run preview` - Preview production build
+- `npm run lint` - Run ESLint
+
+## 🔧 Environment Variables
+
+Create a `.env` file:
+
+```env
+VITE_GOOGLE_CLIENT_ID="your-google-client-id.apps.googleusercontent.com"
+VITE_GOOGLE_REDIRECT_URI="http://localhost:5173/auth/callback"
+VITE_BACKEND_API_URL="http://localhost:8000/api"
+```
+
+## 📁 Project Structure
+
+```
+src/
+├── components/     # Reusable UI components
+├── pages/          # Page components
+├── lib/            # API client and utilities
+├── context/        # React context providers
+├── assets/         # Static assets
+└── App.jsx         # Main app component
+```
+
+## 🛠️ Tech Stack
+
+- **React** 19.1.1
+- **Vite** 7.1.7
+- **React Router** 7.9.5
+- **Axios** - API requests
+- **Tailwind CSS** 4.1.14
+- **Lucide React** - Icons
+- **Bootstrap** 5.3.8
+
+## 📚 Documentation
+
+See the main project documentation:
+- [Setup Guide](../SETUP_GUIDE.md)
+- [Quick Start](../QUICK_START.md)
+- [Docker Guide](./README.Docker.md)
+
+## React + Vite
+
+This template uses [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) for Fast Refresh with HMR.

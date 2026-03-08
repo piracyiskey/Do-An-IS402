@@ -1,6 +1,6 @@
 # ⚡ Quick Start Guide
 
-> **For developers who already have Docker and Node.js installed**
+> **For developers who already have Docker installed**
 
 ---
 
@@ -26,8 +26,7 @@ cd ../electronic-e-commerce
 echo 'VITE_GOOGLE_CLIENT_ID="your-google-client-id.apps.googleusercontent.com"
 VITE_GOOGLE_REDIRECT_URI="http://localhost:5173/auth/callback"
 VITE_BACKEND_API_URL="http://localhost:8000/api"' > .env
-npm install
-npm run dev
+docker-compose up
 
 # ✅ Done! Visit http://localhost:5173
 ```
@@ -44,12 +43,15 @@ docker-compose up -d
 
 # Terminal 2 - Frontend
 cd electronic-e-commerce
-npm run dev
+docker-compose up
 ```
 
 ### **Stop:**
 ```bash
-# Frontend: Ctrl+C
+# Frontend: Ctrl+C in terminal, then:
+cd electronic-e-commerce
+docker-compose down
+
 # Backend:
 cd is-web-project
 docker-compose down
@@ -72,22 +74,35 @@ docker-compose down
 
 **500 Error?**
 ```bash
+cd is-web-project
 docker-compose exec app php artisan optimize:clear
 docker-compose restart app
 ```
 
 **Can't connect to database?**
 ```bash
+cd is-web-project
 docker-compose restart db
 ```
 
 **Port conflict?**
-- Change ports in `docker-compose.yml`
+- Change ports in `docker-compose.yml` (in respective folder)
 - Or stop the conflicting service
 
-**Frontend not connecting?**
-- Check `.env` has: `VITE_BACKEND_API_URL="http://localhost:8000/api"`
-- Restart frontend after .env changes
+**Frontend not connecting to backend?**
+```bash
+# Check .env has: VITE_BACKEND_API_URL="http://localhost:8000/api"
+cd electronic-e-commerce
+docker-compose restart
+```
+
+**Frontend container issues?**
+```bash
+cd electronic-e-commerce
+docker-compose down
+docker-compose build --no-cache
+docker-compose up
+```
 
 ---
 

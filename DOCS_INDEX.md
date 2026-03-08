@@ -98,12 +98,15 @@ See: [GOOGLE_OAUTH_SETUP.md](./GOOGLE_OAUTH_SETUP.md)
 ### **Start Project:**
 ```bash
 cd is-web-project && docker-compose up -d
-cd ../electronic-e-commerce && npm run dev
+cd ../electronic-e-commerce && docker-compose up
 ```
 
 ### **Stop Project:**
 ```bash
-# Frontend: Ctrl+C
+# Frontend: Ctrl+C, then:
+cd electronic-e-commerce && docker-compose down
+
+# Backend:
 cd is-web-project && docker-compose down
 ```
 
