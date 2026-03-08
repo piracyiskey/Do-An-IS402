@@ -11,7 +11,7 @@ class AdminController extends Controller
     // Check if user is admin
     private function isAdmin($user)
     {
-        return $user->email === 'remembermyname2k5@gmail.com';
+        return $user->hasAnyRole(['admin']);
     }
 
     // Get all orders (admin only)

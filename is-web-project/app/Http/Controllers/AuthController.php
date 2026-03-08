@@ -206,11 +206,15 @@ class AuthController extends Controller
         }
         $refreshToken = $this->refreshTokenRepository->generateRefreshTokenForUser($user);
 
+        // Load user's roles
+        $user->load('roles');
+
         // Return the success response with the token and user data
         return response()->json([
             'success' => true,
             'access_token' => $token,
             'refresh_token' => $refreshToken,
+            'user' => $user,
         ]);
     }
 }

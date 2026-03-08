@@ -5,6 +5,8 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\AdminController;
+use App\Http\Controllers\GoogleController;
+
 Route::middleware('check.refresh.token')->group(function () {
     Route::post('/register', [AuthController::class, 'post_register']);
     Route::get('/register', [AuthController::class, 'get_register']);
@@ -13,6 +15,10 @@ Route::middleware('check.refresh.token')->group(function () {
 });
 Route::post('/send-code', [AuthController::class, 'sendCode']);
 Route::post('/verify-code', [AuthController::class, 'verifyCode']);
+
+// Google OAuth route (must be outside auth:api middleware)
+Route::post('/auth/google/exchange', [GoogleController::class, 'exchange']);
+
 Route::middleware('auth:api')->prefix('auth')->group(function () {
     // Admin routes
     route::get('/admin/orders', [\App\Http\Controllers\AdminController::class, 'getAllOrders']);

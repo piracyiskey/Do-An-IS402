@@ -10,9 +10,12 @@ class UserController extends Controller
 {
     public function user(Request $request)
     {
+        $user = $request->user();
+        $user->load('roles'); // Load roles relationship
+        
         return response()->json([
             'success' => true,
-            'data' => $request->user(),
+            'data' => $user,
         ]);
     }
 

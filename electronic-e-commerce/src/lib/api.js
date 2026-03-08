@@ -65,15 +65,13 @@ api.interceptors.response.use(
   (response) => {
     const user = response.data.user;
     const accessToken = response.data.access_token;
-    if (accessToken && (!user || Object.keys(user).length === 0)) {
-      alert("Khong co thong tin cua nguoi dung. Vui lòng đăng nhập lại.");
-      localStorage.removeItem("access_token");
-      localStorage.removeItem("user");
-      window.location.replace("/login");
-    }
+    
+    // Save user data if provided
     if (user) {
       localStorage.setItem("user", JSON.stringify(user));
     }
+    
+    // Save tokens if provided
     if (response.status === 200 && response.data.access_token) {
       localStorage.setItem("access_token", response.data.access_token);
     }
