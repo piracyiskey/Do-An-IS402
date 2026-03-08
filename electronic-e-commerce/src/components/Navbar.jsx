@@ -238,7 +238,7 @@ export default function Navbar({ isTransparent = true }) {
       try {
         const parsedUser = JSON.parse(storedUser);
         setUserName(parsedUser.full_name || parsedUser.name || parsedUser.email || "");
-        setIsAdminUser(parsedUser.email === 'remembermyname2k5@gmail.com');
+        setIsAdminUser(parsedUser?.roles?.some(role => role.role_id === 'admin'));
       } catch { setUserName(""); }
     } else { setUserName(""); }
   };

@@ -87,4 +87,12 @@ class User extends Authenticatable implements JWTSubject
             // Add other claims if needed, e.g., 'permissions' => ['read', 'write']
         ];
     }
+
+    /**
+     * Check if user has any of the given roles.
+     */
+    public function hasAnyRole(array $roles)
+    {
+        return $this->roles()->whereIn('roles.role_id', $roles)->exists();
+    }
 }

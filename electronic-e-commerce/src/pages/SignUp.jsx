@@ -207,6 +207,15 @@ const SignUp = () => {
       });
 
       if (response.data.success) {
+        // Check if user is already logged in
+        if (response.data.redirect) {
+          setMessage(response.data.message || "You are already logged in.");
+          setTimeout(() => {
+            navigate(response.data.redirect);
+          }, 1500);
+          return;
+        }
+
         setMessage(
           "Account created successfully! Please check your email to verify."
         );

@@ -41,6 +41,8 @@ services:
     image: mysql:8.0
     container_name: laravel_db
     restart: unless-stopped
+    ports:
+      - "3307:3306"
     environment:
       MYSQL_ROOT_PASSWORD: dh28042005
       MYSQL_DATABASE: esapp

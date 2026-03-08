@@ -71,6 +71,15 @@ export default function Login() {
       });
 
       if (response.data.success) {
+        // Check if user is already logged in
+        if (response.data.redirect) {
+          // User is already authenticated, redirect them
+          const returnUrl = localStorage.getItem("returnUrl") || response.data.redirect || "/";
+          localStorage.removeItem("returnUrl");
+          navigate(returnUrl);
+          return;
+        }
+
         // Save remembered email
         if (rememberMe) {
           localStorage.setItem("remembered_email", email);

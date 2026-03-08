@@ -5,7 +5,10 @@ import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
 import api from "../lib/api";
 
-const ADMIN_EMAIL = "remembermyname2k5@gmail.com";
+// Check if user has admin role
+const isUserAdmin = (userData) => {
+  return userData?.roles?.some(role => role.role_id === 'admin');
+};
 
 // Status Badge
 const StatusBadge = ({ status, type = "order" }) => {
@@ -177,7 +180,7 @@ const AdminDashboard = () => {
       if (storedUser) {
         try {
           const userData = JSON.parse(storedUser);
-          if (userData.email !== ADMIN_EMAIL) {
+          if (!isUserAdmin(userData)) {
             setIsAdmin(false);
             setIsLoading(false);
             return;

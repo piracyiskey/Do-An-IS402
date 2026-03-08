@@ -7,13 +7,42 @@ export default function GoogleCallback() {
 
   useEffect(() => {
     async function processGoogleCallback() {
-      const res = await handleGoogleCallback();
+      try {
+        const res = await handleGoogleCallback();
+        
         if (!res.data.success) {
-          console.error("Google callback failed:", res.error);
+          console.error("Google callback failed:", res.data.error);
           navigate("/login", { replace: true });
-        } else {
-          navigate(localStorage.getItem("redirectUrl") || "/", { replace: true });
+          return;
         }
+        
+        // Save tokens and user data
+        if (res.data.access_token) {
+          localStorage.setItem("access_token", res.data.access_token);
+        }
+        if (res.data.refresh_token) {
+          localStorage.setItem("refresh_token", res.data.refresh_token);
+        }
+        if (res.data.user) {
+          localStorage.setItem("user", JSON.stringify(res.data.user));
+        }
+        
+        // Clear OAuth state
+        sessionStorage.removeItem('oauth_state');
+        
+        // Dispatch login success event
+        window.dispatchEvent(new Event("loginSuccess"));
+        
+        // Navigate to return URL or home
+        const returnUrl = localStorage.getItem("returnUrl") || "/";
+        localStorage.removeItem("returnUrl");
+        navigate(returnUrl, { replace: true });
+        
+      } catch (error) {
+        console.error("Google callback error:", error);
+        alert("Failed to sign in with Google: " + error.message);
+        navigate("/login", { replace: true });
+      }
     }
 
     processGoogleCallback();
