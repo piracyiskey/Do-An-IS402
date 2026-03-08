@@ -41,14 +41,13 @@ A full-stack e-commerce application built with Laravel (backend) and React (fron
 - React Router
 - Axios
 - Tailwind CSS
+- Docker + Docker Compose
 
 ---
 
 ## 📋 **Prerequisites**
 
 - Docker Desktop
-- Node.js (v20.19+ or v22.12+)
-- npm
 - Git
 
 ---
@@ -71,8 +70,7 @@ Get-Content database/esapp.sql | docker-compose exec -T db mysql -uroot -pdh2804
 
 # Setup frontend
 cd ../electronic-e-commerce
-npm install
-npm run dev
+docker-compose up
 
 # Visit http://localhost:5173
 ```

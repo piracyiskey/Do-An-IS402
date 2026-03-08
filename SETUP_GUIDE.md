@@ -10,13 +10,13 @@ Before starting, ensure you have these installed:
 
 ### **Required Software:**
 - ✅ **Docker Desktop** (for Windows/Mac) - [Download here](https://www.docker.com/products/docker-desktop)
-- ✅ **Node.js** (v20.19+ or v22.12+) - [Download here](https://nodejs.org/)
-- ✅ **npm** (comes with Node.js)
 - ✅ **Git** (for cloning) - [Download here](https://git-scm.com/)
 
 ### **Optional (Recommended):**
 - 🔧 **MySQL Workbench** - for database management
 - 🔧 **VS Code** - recommended code editor
+
+**Note:** Node.js and npm are no longer required on your machine - Docker handles all dependencies!
 
 ---
 
@@ -155,7 +155,7 @@ docker-compose exec app php artisan optimize:clear
 
 ---
 
-### **STEP 3: Frontend Setup (React + Vite)**
+### **STEP 3: Frontend Setup (React + Vite + Docker)**
 
 #### **3.1 Navigate to Frontend Folder**
 ```bash
@@ -171,19 +171,21 @@ VITE_GOOGLE_REDIRECT_URI="http://localhost:5173/auth/callback"
 VITE_BACKEND_API_URL="http://localhost:8000/api"
 ```
 
-#### **3.3 Install Dependencies**
+#### **3.3 Start Docker Container**
 ```bash
-npm install
+docker-compose up
 ```
 
-⏱️ **Takes 2-5 minutes depending on internet speed**
+⏱️ **First build takes 3-5 minutes** (downloads Node.js image and installs dependencies)
 
-#### **3.4 Start Development Server**
-```bash
-npm run dev
-```
+The container will:
+- Install all npm dependencies automatically
+- Start the Vite development server
+- Enable hot reload for live code changes
 
 ✅ **Frontend is ready at: http://localhost:5173**
+
+**Note:** To run in background, use `docker-compose up -d`
 
 ---
 
@@ -230,7 +232,15 @@ Database: esapp
 ## 🛑 **Stopping the Project**
 
 ### **Stop Frontend:**
-- Press `Ctrl + C` in the terminal running `npm run dev`
+```bash
+# If running in foreground: Press Ctrl + C, then:
+cd electronic-e-commerce
+docker-compose down
+
+# If running in background:
+cd electronic-e-commerce
+docker-compose down
+```
 
 ### **Stop Backend:**
 ```bash
@@ -238,7 +248,7 @@ cd is-web-project
 docker-compose down
 ```
 
-**Note:** Your database data is preserved in Docker volumes and won't be lost.
+**Note:** Your data (database & node_modules) is preserved in Docker volumes and won't be lost.
 
 ---
 
@@ -256,10 +266,13 @@ docker-compose up -d
 **2. Start Frontend:**
 ```bash
 cd electronic-e-commerce
-npm run dev
+docker-compose up
 ```
+⏱️ Takes ~5-10 seconds (much faster after first build)
 
 That's it! No need to reinstall or reconfigure.
+
+**Tip:** Use `docker-compose up -d` to run frontend in background too.
 
 ---
 
@@ -316,6 +329,38 @@ docker-compose exec db mysqldump -uroot -pdh28042005 esapp > backup.sql
 Get-Content backup.sql | docker-compose exec -T db mysql -uroot -pdh28042005 esapp
 ```
 
+### **Frontend Docker Commands:**
+```bash
+# Navigate to frontend directory first
+cd electronic-e-commerce
+
+# View frontend container status
+docker-compose ps
+
+# View frontend logs (live)
+docker-compose logs -f
+
+# Restart frontend
+docker-compose restart
+
+# Rebuild after package.json changes
+docker-compose down
+docker-compose build
+docker-compose up
+
+# Access container shell (for debugging)
+docker-compose exec frontend sh
+
+# Run npm commands inside container
+docker-compose exec frontend npm install <package-name>
+docker-compose exec frontend npm list
+
+# Clean rebuild
+docker-compose down
+docker-compose build --no-cache
+docker-compose up
+```
+
 ---
 
 ## ⚙️ **Google OAuth Setup (Optional)**
@@ -353,9 +398,12 @@ VITE_GOOGLE_REDIRECT_URI="http://localhost:5173/auth/callback"
 ### **3. Restart Services:**
 ```bash
 # Restart backend
+cd is-web-project
 docker-compose restart app
 
-# Restart frontend (Ctrl+C, then npm run dev)
+# Restart frontend
+cd electronic-e-commerce
+docker-compose restart
 ```
 
 ---
@@ -405,7 +453,8 @@ docker-compose restart db
 # Should be: VITE_BACKEND_API_URL="http://localhost:8000/api"
 
 # Restart frontend after .env changes
-# (Ctrl+C, then npm run dev)
+cd electronic-e-commerce
+docker-compose restart
 ```
 
 ### **Problem: JWT token errors**
@@ -420,19 +469,26 @@ docker-compose exec app php artisan config:clear
 docker-compose restart app
 ```
 
-### **Problem: npm install fails**
+### **Problem: npm/dependency issues**
 ```bash
-# Clear npm cache
-npm cache clean --force
-
-# Delete node_modules and try again
-rm -rf node_modules package-lock.json
-npm install
+# Rebuild Docker image without cache
+cd electronic-e-commerce
+docker-compose down
+docker-compose build --no-cache
+docker-compose up
 ```
 
 ### **Problem: Port 5173 already in use**
-Vite will automatically try the next available port (5174, 5175, etc.)
-Update your Google OAuth redirect URI if port changes.
+```bash
+# Stop the container using the port
+cd electronic-e-commerce
+docker-compose down
+
+# Or change the port in docker-compose.yml:
+# ports:
+#   - "8080:5173"  # Use 8080 instead
+# Then update Google OAuth redirect URI accordingly
+```
 
 ---
 
@@ -440,7 +496,7 @@ Update your Google OAuth redirect URI if port changes.
 
 ```
 Do-An-IS402/
-├── electronic-e-commerce/          # Frontend (React + Vite)
+├── electronic-e-commerce/          # Frontend (React + Vite + Docker)
 │   ├── src/
 │   │   ├── components/            # Reusable components
 │   │   ├── pages/                 # Page components
@@ -448,10 +504,13 @@ Do-An-IS402/
 │   │   ├── context/               # React context
 │   │   └── App.jsx               # Main app component
 │   ├── public/                    # Static assets
+│   ├── Dockerfile                 # Frontend Docker configuration
+│   ├── docker-compose.yml         # Frontend Docker orchestration
+│   ├── nginx.conf                 # Nginx config (production)
 │   ├── package.json
 │   └── .env                       # Frontend environment
 │
-└── is-web-project/                 # Backend (Laravel)
+└── is-web-project/                 # Backend (Laravel + Docker)
     ├── app/
     │   ├── Http/Controllers/      # API controllers
     │   ├── Models/                # Database models
@@ -463,7 +522,7 @@ Do-An-IS402/
     │   └── esapp.sql             # Sample data
     ├── routes/
     │   └── api.php               # API routes
-    ├── docker-compose.yml         # Docker configuration
+    ├── docker-compose.yml         # Backend Docker configuration
     └── .env                       # Backend environment
 ```
 
@@ -500,9 +559,9 @@ Do-An-IS402/
 ### **Daily Development:**
 1. Start Docker Desktop
 2. `cd is-web-project && docker-compose up -d`
-3. `cd ../electronic-e-commerce && npm run dev`
-4. Code away! ✨
-5. Stop: Ctrl+C frontend, `docker-compose down` backend
+3. `cd ../electronic-e-commerce && docker-compose up`
+4. Code away! ✨ (Hot reload enabled)
+5. Stop: `Ctrl+C` in each terminal, then `docker-compose down` in each folder
 
 ### **Before Committing:**
 ```bash
@@ -527,7 +586,7 @@ Before deploying to production:
 1. ✅ Change all passwords and secrets
 2. ✅ Set `APP_DEBUG=false` in backend .env
 3. ✅ Enable real SMTP for emails (not log)
-4. ✅ Use `npm run build` for frontend
+4. ✅ Build optimized frontend: `docker build --target production`
 5. ✅ Set up SSL certificates (HTTPS)
 6. ✅ Configure CORS properly
 7. ✅ Set up proper database backups
@@ -541,27 +600,26 @@ Before deploying to production:
 
 - **Laravel:** Latest
 - **React:** 19.1.1
-- **Node.js:** 20.12.0+ (20.19+ or 22.12+ recommended)
-- **MySQL:** 8.0
+- **Node.js:** 20-alpine (via Docker)
+- **MySQL:** 8.0 (via Docker)
 - **PHP:** 8.x (via Docker)
-- **nginx:** Alpine (via Docker)
+- **nginx:** Alpine (via Docker - for production)
+- **Vite:** 7.1.7
 
 ---
 
 ## ✅ **Checklist for Fresh Setup**
 
 - [ ] Docker Desktop installed and running
-- [ ] Node.js installed (v20.19+ or v22.12+)
 - [ ] Repository cloned
 - [ ] Backend .env configured
-- [ ] Docker containers running (`docker-compose ps`)
+- [ ] Backend Docker containers running (`docker-compose ps`)
 - [ ] PHP dependencies installed
 - [ ] JWT secret generated
 - [ ] Database migrated
 - [ ] Sample data imported
 - [ ] Frontend .env configured
-- [ ] npm dependencies installed
-- [ ] Frontend dev server running
+- [ ] Frontend Docker container running
 - [ ] Can access http://localhost:5173
 - [ ] Can browse products
 - [ ] Can sign up/login
