@@ -34,12 +34,12 @@ docker-compose up -d
 docker-compose exec app composer install
 docker-compose exec app php artisan jwt:secret
 docker-compose exec app php artisan migrate
-Get-Content database/esapp.sql | docker-compose exec -T db mysql -uroot -pdh28042005 esapp
+Get-Content database/esapp.sql -Encoding UTF8 | docker-compose exec -T db mysql -uroot -pdh28042005 esapp
 
 # 3. Frontend Setup
 cd ../electronic-e-commerce
-npm install
-npm run dev
+cp .env.example .env
+docker-compose up
 
 # Done! Visit http://localhost:5173
 ```
@@ -133,7 +133,7 @@ docker-compose exec app php artisan migrate
 
 **For PowerShell (Windows):**
 ```powershell
-Get-Content database/esapp.sql | docker-compose exec -T db mysql -uroot -pdh28042005 esapp
+Get-Content database/esapp.sql -Encoding UTF8 | docker-compose exec -T db mysql -uroot -pdh28042005 esapp
 ```
 
 **For Bash (Mac/Linux):**
@@ -163,13 +163,20 @@ cd ../electronic-e-commerce
 ```
 
 #### **3.2 Create Environment File**
-Create a `.env` file with:
+```bash
+# Copy the example environment file
+cp .env.example .env
+```
+
+**Or create manually** with these contents:
 
 ```env
 VITE_GOOGLE_CLIENT_ID="your-google-client-id.apps.googleusercontent.com"
 VITE_GOOGLE_REDIRECT_URI="http://localhost:5173/auth/callback"
 VITE_BACKEND_API_URL="http://localhost:8000/api"
 ```
+
+**Note:** The default values work out-of-the-box. Only update `VITE_GOOGLE_CLIENT_ID` if you want Google OAuth.
 
 #### **3.3 Start Docker Container**
 ```bash

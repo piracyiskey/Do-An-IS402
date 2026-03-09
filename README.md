@@ -66,10 +66,11 @@ docker-compose up -d
 docker-compose exec app composer install
 docker-compose exec app php artisan jwt:secret
 docker-compose exec app php artisan migrate
-Get-Content database/esapp.sql | docker-compose exec -T db mysql -uroot -pdh28042005 esapp
+Get-Content database/esapp.sql -Encoding UTF8 | docker-compose exec -T db mysql -uroot -pdh28042005 esapp
 
 # Setup frontend
 cd ../electronic-e-commerce
+cp .env.example .env
 docker-compose up
 
 # Visit http://localhost:5173
