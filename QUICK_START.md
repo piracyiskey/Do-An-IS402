@@ -11,22 +11,21 @@
 git clone <repo-url>
 cd Do-An-IS402
 
-# 2. Backend Setup
-cd is-web-project
-cp .env.example .env
-docker-compose up -d
-docker-compose exec app composer install
-docker-compose exec app php artisan jwt:secret
-docker-compose exec app php artisan migrate
-docker cp database/esapp.sql $(docker-compose ps -q db | Select-Object -First 1):/tmp/esapp.sql
-docker-compose exec db bash -c "mysql -uroot -pdh28042005 esapp < /tmp/esapp.sql"
-docker-compose exec app php artisan optimize:clear
+# 2. Setup environment files
+cp is-web-project/.env.example is-web-project/.env
+cp electronic-e-commerce/.env.example electronic-e-commerce/.env
+# Optional: Edit .env files to add your Google Client ID
 
-# 3. Frontend Setup
-cd ../electronic-e-commerce
-cp .env.example .env
-# Optional: Edit .env to add your Google Client ID
-docker-compose up
+# 3. Start all services (one command!)
+docker-compose up -d
+
+# 4. Setup backend
+docker-compose exec backend composer install
+docker-compose exec backend php artisan jwt:secret
+docker-compose exec backend php artisan migrate
+docker cp is-web-project/database/esapp.sql ecommerce-db:/tmp/esapp.sql
+docker-compose exec db bash -c "mysql -uroot -pdh28042005 esapp < /tmp/esapp.sql"
+docker-compose exec backend php artisan optimize:clear
 
 # ✅ Done! Visit http://localhost:5173
 ```
@@ -37,24 +36,20 @@ docker-compose up
 
 ### **Start:**
 ```bash
-# Terminal 1 - Backend
-cd is-web-project
-docker-compose up -d
-
-# Terminal 2 - Frontend
-cd electronic-e-commerce
+# From project root - ONE command starts everything!
 docker-compose up
+
+# Or run in background:
+docker-compose up -d
 ```
 
 ### **Stop:**
 ```bash
-# Frontend: Ctrl+C in terminal, then:
-cd electronic-e-commerce
+# From project root
 docker-compose down
 
-# Backend:
-cd is-web-project
-docker-compose down
+# Stop without removing containers (faster restart):
+docker-compose stop
 ```
 
 ---
@@ -74,34 +69,30 @@ docker-compose down
 
 **500 Error?**
 ```bash
-cd is-web-project
-docker-compose exec app php artisan optimize:clear
-docker-compose restart app
+docker-compose exec backend php artisan optimize:clear
+docker-compose restart backend
 ```
 
 **Can't connect to database?**
 ```bash
-cd is-web-project
 docker-compose restart db
 ```
 
 **Port conflict?**
-- Change ports in `docker-compose.yml` (in respective folder)
+- Change ports in root `docker-compose.yml`
 - Or stop the conflicting service
 
 **Frontend not connecting to backend?**
 ```bash
-# Check .env has: VITE_BACKEND_API_URL="http://localhost:8000/api"
-cd electronic-e-commerce
-docker-compose restart
+# Check electronic-e-commerce/.env has: VITE_BACKEND_API_URL="http://localhost:8000/api"
+docker-compose restart frontend
 ```
 
-**Frontend container issues?**
+**Container issues?**
 ```bash
-cd electronic-e-commerce
 docker-compose down
 docker-compose build --no-cache
-docker-compose up
+docker-compose up -d
 ```
 
 ---

@@ -97,27 +97,25 @@ See: [GOOGLE_OAUTH_SETUP.md](./GOOGLE_OAUTH_SETUP.md)
 
 ### **Start Project:**
 ```bash
-cd is-web-project && docker-compose up -d
-cd ../electronic-e-commerce && docker-compose up
+# From project root - ONE command starts everything!
+docker-compose up -d
 ```
 
 ### **Stop Project:**
 ```bash
-# Frontend: Ctrl+C, then:
-cd electronic-e-commerce && docker-compose down
-
-# Backend:
-cd is-web-project && docker-compose down
+# From project root
+docker-compose down
 ```
 
 ### **Clear Caches:**
 ```bash
-docker-compose exec app php artisan optimize:clear
+docker-compose exec backend php artisan optimize:clear
 ```
 
 ### **View Logs:**
 ```bash
-docker-compose logs -f app
+docker-compose logs -f backend
+docker-compose logs -f frontend
 ```
 
 Full command reference: [SETUP_GUIDE.md](./SETUP_GUIDE.md#useful-commands)
@@ -146,7 +144,7 @@ Full command reference: [SETUP_GUIDE.md](./SETUP_GUIDE.md#useful-commands)
 3. **Still stuck?**
    - Check Docker logs: `docker-compose logs -f`
    - Verify containers: `docker-compose ps`
-   - Clear caches: `php artisan optimize:clear`
+   - Clear caches: `docker-compose exec backend php artisan optimize:clear`
 
 ---
 

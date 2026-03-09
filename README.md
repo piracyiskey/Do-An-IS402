@@ -59,20 +59,21 @@ A full-stack e-commerce application built with Laravel (backend) and React (fron
 git clone <repository-url>
 cd Do-An-IS402
 
-# Setup backend
-cd is-web-project
-cp .env.example .env
-docker-compose up -d
-docker-compose exec app composer install
-docker-compose exec app php artisan jwt:secret
-docker-compose exec app php artisan migrate
-docker cp database/esapp.sql $(docker-compose ps -q db | Select-Object -First 1):/tmp/esapp.sql
-docker-compose exec db bash -c "mysql -uroot -pdh28042005 esapp < /tmp/esapp.sql"
+# Setup environment files
+cp is-web-project/.env.example is-web-project/.env
+cp electronic-e-commerce/.env.example electronic-e-commerce/.env
 
-# Setup frontend
-cd ../electronic-e-commerce
-cp .env.example .env
-docker-compose up
+# Start all services (one command!)
+docker-compose up -d
+
+# Setup backend
+docker-compose exec backend composer install
+docker-compose exec backend php artisan jwt:secret
+docker-compose exec backend php artisan migrate
+docker cp is-web-project/database/esapp.sql ecommerce-db:/tmp/esapp.sql
+docker-compose exec db bash -c "mysql -uroot -pdh28042005 esapp < /tmp/esapp.sql"
+docker cp is-web-project/database/esapp.sql $(docker-compose ps -q db | Select-Object -First 1):/tmp/esapp.sql
+docker-compose exec db bash -c "mysql -uroot -pdh28042005 esapp < /tmp/esapp.sql"
 
 # Visit http://localhost:5173
 ```
@@ -96,11 +97,13 @@ docker-compose up
 
 ```
 Do-An-IS402/
-├── electronic-e-commerce/     # React Frontend
-├── is-web-project/            # Laravel Backend
-├── SETUP_GUIDE.md            # Complete setup instructions
-├── QUICK_START.md            # Quick reference
-└── README.md                 # This file
+├── docker-compose.yml        # 🆕 Unified Docker orchestration
+├── electronic-e-commerce/    # React Frontend
+├── is-web-project/           # Laravel Backend
+├── SETUP_GUIDE.md           # Complete setup instructions
+├── QUICK_START.md           # Quick reference
+├── DOCKER_SETUP.md          # Docker architecture explanation
+└── README.md                # This file
 ```
 
 ---
@@ -108,10 +111,7 @@ Do-An-IS402/
 ## 🛑 **Stop Project**
 
 ```bash
-# Stop frontend: Ctrl+C
-
-# Stop backend:
-cd is-web-project
+# From project root - stops everything
 docker-compose down
 ```
 
@@ -119,6 +119,13 @@ docker-compose down
 
 ## 📚 **Documentation**
 
+- **[Setup Guide](./SETUP_GUIDE.md)** - Detailed step-by-step setup
+- **[Quick Start](./QUICK_START.md)** - Fast setup for experienced developers
+- **[Docker Setup](./DOCKER_SETUP.md)** - Docker architecture explained
+- **[Google OAuth Setup](./GOOGLE_OAUTH_SETUP.md)** - OAuth configuration
+- **[ENV Reference](./ENV_REFERENCE.md)** - Environment variables explained
+
+### **External Resources:**
 - [Laravel Documentation](https://laravel.com/docs)
 - [React Documentation](https://react.dev)
 - [Docker Documentation](https://docs.docker.com)

@@ -640,7 +640,7 @@ CREATE TABLE `user_roles` (
 
 LOCK TABLES `user_roles` WRITE;
 /*!40000 ALTER TABLE `user_roles` DISABLE KEYS */;
-INSERT INTO `user_roles` VALUES (5,'member'),(6,'member'),(7,'admin');
+INSERT INTO `user_roles` VALUES (5,'admin'),(6,'member'),(7,'admin');
 /*!40000 ALTER TABLE `user_roles` ENABLE KEYS */;
 UNLOCK TABLES;
 

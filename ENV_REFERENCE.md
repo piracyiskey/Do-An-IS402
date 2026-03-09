@@ -150,14 +150,12 @@ CORS:     Specific origins only
 
 ### **APP_KEY (Laravel)**
 ```bash
-cd is-web-project
-docker-compose exec app php artisan key:generate
+docker-compose exec backend php artisan key:generate
 ```
 
 ### **JWT_SECRET**
 ```bash
-cd is-web-project
-docker-compose exec app php artisan jwt:secret
+docker-compose exec backend php artisan jwt:secret
 ```
 
 ### **Random String (for passwords)**
@@ -178,22 +176,23 @@ openssl rand -base64 32
 **Backend:**
 ```bash
 cd is-web-project
-docker-compose restart app
-docker-compose exec app php artisan config:clear
+docker-compose restart backend
+docker-compose exec backend php artisan config:clear
 ```
 
 **Frontend:**
 ```bash
-cd electronic-e-commerce
-docker-compose restart
+docker-compose restart frontend
 ```
+
+**Note:** All commands now run from project root!
 
 ### **Check Current Config:**
 
 **Backend:**
 ```bash
-docker-compose exec app php artisan config:show
-docker-compose exec app php artisan env
+docker-compose exec backend php artisan config:show
+docker-compose exec backend php artisan env
 ```
 
 **Frontend:**
