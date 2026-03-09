@@ -18,14 +18,13 @@ docker-compose up -d
 docker-compose exec app composer install
 docker-compose exec app php artisan jwt:secret
 docker-compose exec app php artisan migrate
-Get-Content database/esapp.sql | docker-compose exec -T db mysql -uroot -pdh28042005 esapp
+Get-Content database/esapp.sql -Encoding UTF8 | docker-compose exec -T db mysql -uroot -pdh28042005 esapp
 docker-compose exec app php artisan optimize:clear
 
 # 3. Frontend Setup
 cd ../electronic-e-commerce
-echo 'VITE_GOOGLE_CLIENT_ID="your-google-client-id.apps.googleusercontent.com"
-VITE_GOOGLE_REDIRECT_URI="http://localhost:5173/auth/callback"
-VITE_BACKEND_API_URL="http://localhost:8000/api"' > .env
+cp .env.example .env
+# Optional: Edit .env to add your Google Client ID
 docker-compose up
 
 # ✅ Done! Visit http://localhost:5173
