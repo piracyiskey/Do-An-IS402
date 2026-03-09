@@ -34,7 +34,8 @@ docker-compose up -d
 docker-compose exec app composer install
 docker-compose exec app php artisan jwt:secret
 docker-compose exec app php artisan migrate
-Get-Content database/esapp.sql -Encoding UTF8 | docker-compose exec -T db mysql -uroot -pdh28042005 esapp
+docker cp database/esapp.sql $(docker-compose ps -q db | Select-Object -First 1):/tmp/esapp.sql
+docker-compose exec db bash -c "mysql -uroot -pdh28042005 esapp < /tmp/esapp.sql"
 
 # 3. Frontend Setup
 cd ../electronic-e-commerce
@@ -133,12 +134,16 @@ docker-compose exec app php artisan migrate
 
 **For PowerShell (Windows):**
 ```powershell
-Get-Content database/esapp.sql -Encoding UTF8 | docker-compose exec -T db mysql -uroot -pdh28042005 esapp
+# Copy SQL file to container and import (preserves UTF-8 encoding)
+docker cp database/esapp.sql $(docker-compose ps -q db | Select-Object -First 1):/tmp/esapp.sql
+docker-compose exec db bash -c "mysql -uroot -pdh28042005 esapp < /tmp/esapp.sql"
 ```
 
 **For Bash (Mac/Linux):**
 ```bash
-docker-compose exec -T db mysql -uroot -pdh28042005 esapp < database/esapp.sql
+# Copy SQL file to container and import
+docker cp database/esapp.sql $(docker-compose ps -q db | head -1):/tmp/esapp.sql
+docker-compose exec db bash -c "mysql -uroot -pdh28042005 esapp < /tmp/esapp.sql"
 ```
 
 #### **2.10 Set Permissions (if needed)**
