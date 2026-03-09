@@ -18,7 +18,8 @@ docker-compose up -d
 docker-compose exec app composer install
 docker-compose exec app php artisan jwt:secret
 docker-compose exec app php artisan migrate
-Get-Content database/esapp.sql -Encoding UTF8 | docker-compose exec -T db mysql -uroot -pdh28042005 esapp
+docker cp database/esapp.sql $(docker-compose ps -q db | Select-Object -First 1):/tmp/esapp.sql
+docker-compose exec db bash -c "mysql -uroot -pdh28042005 esapp < /tmp/esapp.sql"
 docker-compose exec app php artisan optimize:clear
 
 # 3. Frontend Setup

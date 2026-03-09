@@ -613,7 +613,7 @@ CREATE TABLE `roles` (
 
 LOCK TABLES `roles` WRITE;
 /*!40000 ALTER TABLE `roles` DISABLE KEYS */;
-INSERT INTO `roles` VALUES ('member','default user');
+INSERT INTO `roles` VALUES ('member','default user'), ('admin','administrator with full access');
 /*!40000 ALTER TABLE `roles` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -640,7 +640,7 @@ CREATE TABLE `user_roles` (
 
 LOCK TABLES `user_roles` WRITE;
 /*!40000 ALTER TABLE `user_roles` DISABLE KEYS */;
-INSERT INTO `user_roles` VALUES (5,'member'),(6,'member');
+INSERT INTO `user_roles` VALUES (5,'member'),(6,'member'),(7,'admin');
 /*!40000 ALTER TABLE `user_roles` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -679,7 +679,7 @@ CREATE TABLE `users` (
 
 LOCK TABLES `users` WRITE;
 /*!40000 ALTER TABLE `users` DISABLE KEYS */;
-INSERT INTO `users` VALUES (5,'newatomicemail2005@atomicmail.io','$2y$12$s9vdzcmH3yZEnS18SMU1r.dK.VUkBvBp/QVAst.D551p.d/7b90Gq','tester1',NULL,NULL,NULL,NULL,452,1,'105821','silver','2025-12-13 01:56:07','2025-12-17 23:51:09'),(6,'remembermyname2k5@gmail.com','$2y$12$O0q1UoY0/Z3lwH14z5lv0O.6BW8heEH6CF0JFXoctTIWuaIAMFizm','test1',NULL,NULL,NULL,NULL,0,1,'807638','silver','2025-12-15 23:30:31','2025-12-15 23:35:17');
+INSERT INTO `users` VALUES (5,'newatomicemail2005@atomicmail.io','$2y$12$s9vdzcmH3yZEnS18SMU1r.dK.VUkBvBp/QVAst.D551p.d/7b90Gq','tester1',NULL,NULL,NULL,NULL,452,1,'105821','silver','2025-12-13 01:56:07','2025-12-17 23:51:09'),(6,'remembermyname2k5@gmail.com','$2y$12$O0q1UoY0/Z3lwH14z5lv0O.6BW8heEH6CF0JFXoctTIWuaIAMFizm','test1',NULL,NULL,NULL,NULL,0,1,'807638','silver','2025-12-15 23:30:31','2025-12-15 23:35:17'),(7,'cheesemcrib2004@gmail.com','$2y$12$0jmdiQVEmhclumqAc9mOLeJ8O.FPlIKxviryEIXoTPJQJt6yQZn2C','Donald Mc',NULL,NULL,NULL,NULL,0,1,'123456','silver','2025-12-15 23:30:31','2025-12-15 23:35:17');
 /*!40000 ALTER TABLE `users` ENABLE KEYS */;
 UNLOCK TABLES;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
