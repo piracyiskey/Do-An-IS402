@@ -27,20 +27,19 @@ Before starting, ensure you have these installed:
 git clone <repository-url>
 cd Do-An-IS402
 
-# 2. Backend Setup
-cd is-web-project
-cp .env.example .env
-docker-compose up -d
-docker-compose exec app composer install
-docker-compose exec app php artisan jwt:secret
-docker-compose exec app php artisan migrate
-docker cp database/esapp.sql $(docker-compose ps -q db | Select-Object -First 1):/tmp/esapp.sql
-docker-compose exec db bash -c "mysql -uroot -pdh28042005 esapp < /tmp/esapp.sql"
+# 2. Setup environment files
+cp is-web-project/.env.example is-web-project/.env
+cp electronic-e-commerce/.env.example electronic-e-commerce/.env
 
-# 3. Frontend Setup
-cd ../electronic-e-commerce
-cp .env.example .env
-docker-compose up
+# 3. Start all services (one command!)
+docker-compose up -d
+
+# 4. Setup backend
+docker-compose exec backend composer install
+docker-compose exec backend php artisan jwt:secret
+docker-compose exec backend php artisan migrate
+docker cp is-web-project/database/esapp.sql $(docker-compose ps -q db | Select-Object -First 1):/tmp/esapp.sql
+docker-compose exec db bash -c "mysql -uroot -pdh28042005 esapp < /tmp/esapp.sql"
 
 # Done! Visit http://localhost:5173
 ```
@@ -58,146 +57,110 @@ cd Do-An-IS402
 
 ---
 
-### **STEP 2: Backend Setup (Laravel + Docker)**
+### **STEP 2: Setup Environment Files**
 
-#### **2.1 Navigate to Backend Folder**
+#### **2.1 Backend Environment**
 ```bash
-cd is-web-project
+cp is-web-project/.env.example is-web-project/.env
 ```
 
-#### **2.2 Create Environment File**
+The `.env.example` has sensible defaults. You can edit `is-web-project/.env` later if needed.
+
+#### **2.2 Frontend Environment**
 ```bash
-# Copy the example environment file
-cp .env.example .env
+cp electronic-e-commerce/.env.example electronic-e-commerce/.env
 ```
 
-#### **2.3 Configure .env File**
-Open `.env` and ensure these settings:
+Default values work out-of-the-box. Only update `VITE_GOOGLE_CLIENT_ID` if you want Google OAuth.
 
-```env
-APP_NAME=esapp
-APP_ENV=local
-APP_KEY=base64:KRz3jXPYdm8gjYF4qUGqtjO/bx8m/s2CRCkDPqspvqE=
-APP_DEBUG=true
-APP_URL=http://localhost:8000
+---
 
-DB_CONNECTION=mysql
-DB_HOST=db
-DB_PORT=3306
-DB_DATABASE=esapp
-DB_USERNAME=root
-DB_PASSWORD=dh28042005
+### **STEP 3: Start All Services**
 
-CACHE_STORE=file
-SESSION_DRIVER=file
-QUEUE_CONNECTION=database
-
-MAIL_MAILER=log
-MAIL_FROM_ADDRESS="hello@example.com"
-
-JWT_SECRET=  # Will be generated in next step
-```
-
-#### **2.4 Start Docker Desktop**
+#### **3.1 Ensure Docker Desktop is Running**
 - Open Docker Desktop application
 - Wait until it's fully running (whale icon stops animating)
 
-#### **2.5 Build and Start Containers**
+#### **3.2 Start All Containers (One Command!)**
 ```bash
 docker-compose up -d
 ```
 
-⏱️ **First build takes 5-10 minutes** (downloads images and builds PHP container)
+⏱️ **First build takes 5-10 minutes** (downloads images and builds containers)
 
-Containers that will start:
-- `laravel_app` - PHP/Laravel application
-- `laravel_nginx` - Web server (port 8000)
-- `laravel_db` - MySQL database (port 3307)
-- `laravel_phpmyadmin` - Database management UI (port 8080)
+This single command starts **all services**:
+- `frontend` - React + Vite dev server (port 5173)
+- `backend` - PHP/Laravel application
+- `nginx` - Web server (port 8000)
+- `db` - MySQL 8.0 database (port 3307)
+- `phpmyadmin` - Database management UI (port 8080)
 
-#### **2.6 Install PHP Dependencies**
+**Verify all containers are running:**
 ```bash
-docker-compose exec app composer install
+docker-compose ps
 ```
 
-#### **2.7 Generate JWT Secret Key**
+---
+
+### **STEP 4: Setup Backend**
+
+All commands run from the project root:
+
+#### **4.1 Install PHP Dependencies**
 ```bash
-docker-compose exec app php artisan jwt:secret
+docker-compose exec backend composer install
 ```
 
-#### **2.8 Run Database Migrations**
+#### **4.2 Generate JWT Secret Key**
 ```bash
-docker-compose exec app php artisan migrate
+docker-compose exec backend php artisan jwt:secret
 ```
 
-#### **2.9 Import Sample Data**
+#### **4.3 Run Database Migrations**
+```bash
+docker-compose exec backend php artisan migrate
+```
+
+#### **4.4 Import Sample Data**
+
+This method copies the SQL file into the container first, then imports it. This avoids encoding issues with PowerShell and works consistently across all platforms.
 
 **For PowerShell (Windows):**
 ```powershell
-# Copy SQL file to container and import (preserves UTF-8 encoding)
-docker cp database/esapp.sql $(docker-compose ps -q db | Select-Object -First 1):/tmp/esapp.sql
+docker cp is-web-project/database/esapp.sql ecommerce-db:/tmp/esapp.sql
 docker-compose exec db bash -c "mysql -uroot -pdh28042005 esapp < /tmp/esapp.sql"
 ```
 
 **For Bash (Mac/Linux):**
 ```bash
-# Copy SQL file to container and import
-docker cp database/esapp.sql $(docker-compose ps -q db | head -1):/tmp/esapp.sql
+docker cp is-web-project/database/esapp.sql ecommerce-db:/tmp/esapp.sql
 docker-compose exec db bash -c "mysql -uroot -pdh28042005 esapp < /tmp/esapp.sql"
 ```
 
-#### **2.10 Set Permissions (if needed)**
+**Alternative (Bash only - direct pipe):**
 ```bash
-docker-compose exec app chmod -R 777 storage bootstrap/cache
+docker-compose exec -T db mysql -uroot -pdh28042005 esapp < is-web-project/database/esapp.sql
 ```
 
-#### **2.11 Clear Caches**
+#### **4.5 Set Permissions (if needed)**
 ```bash
-docker-compose exec app php artisan optimize:clear
+docker-compose exec backend chmod -R 777 storage bootstrap/cache
+```
+
+#### **4.6 Clear Caches**
+```bash
+docker-compose exec backend php artisan optimize:clear
 ```
 
 ✅ **Backend is ready at: http://localhost:8000**
 
 ---
 
-### **STEP 3: Frontend Setup (React + Vite + Docker)**
+### **STEP 5: Verify Everything Works**
 
-#### **3.1 Navigate to Frontend Folder**
-```bash
-cd ../electronic-e-commerce
-```
-
-#### **3.2 Create Environment File**
-```bash
-# Copy the example environment file
-cp .env.example .env
-```
-
-**Or create manually** with these contents:
-
-```env
-VITE_GOOGLE_CLIENT_ID="your-google-client-id.apps.googleusercontent.com"
-VITE_GOOGLE_REDIRECT_URI="http://localhost:5173/auth/callback"
-VITE_BACKEND_API_URL="http://localhost:8000/api"
-```
-
-**Note:** The default values work out-of-the-box. Only update `VITE_GOOGLE_CLIENT_ID` if you want Google OAuth.
-
-#### **3.3 Start Docker Container**
-```bash
-docker-compose up
-```
-
-⏱️ **First build takes 3-5 minutes** (downloads Node.js image and installs dependencies)
-
-The container will:
-- Install all npm dependencies automatically
-- Start the Vite development server
-- Enable hot reload for live code changes
+The frontend container automatically installs dependencies and starts when you ran `docker-compose up`.
 
 ✅ **Frontend is ready at: http://localhost:5173**
-
-**Note:** To run in background, use `docker-compose up -d`
 
 ---
 
@@ -244,20 +207,16 @@ Database: esapp
 ## 🛑 **Stopping the Project**
 
 ### **Stop Frontend:**
+## 🛑 **Stopping the Project**
+
+From the project root:
+
 ```bash
-# If running in foreground: Press Ctrl + C, then:
-cd electronic-e-commerce
+# Stop all services
 docker-compose down
 
-# If running in background:
-cd electronic-e-commerce
-docker-compose down
-```
-
-### **Stop Backend:**
-```bash
-cd is-web-project
-docker-compose down
+# Or stop without removing containers (faster restart):
+docker-compose stop
 ```
 
 **Note:** Your data (database & node_modules) is preserved in Docker volumes and won't be lost.
@@ -268,41 +227,44 @@ docker-compose down
 
 ### **Next Time You Want to Run:**
 
-**1. Start Backend:**
+From the project root:
+
 ```bash
-cd is-web-project
+# Start all services
 docker-compose up -d
 ```
-⏱️ Takes ~10-30 seconds (much faster after first build)
 
-**2. Start Frontend:**
-```bash
-cd electronic-e-commerce
-docker-compose up
-```
-⏱️ Takes ~5-10 seconds (much faster after first build)
+⏱️ Takes ~10-30 seconds (much faster after first build)
 
 That's it! No need to reinstall or reconfigure.
 
-**Tip:** Use `docker-compose up -d` to run frontend in background too.
+**Tip:** Remove `-d` to see logs in foreground: `docker-compose up`
 
 ---
 
 ## 🔧 **Useful Commands**
 
+All commands run from the project root:
+
 ### **Docker Commands:**
 ```bash
-# View container status
+# View all container status
 docker-compose ps
 
-# View logs
-docker-compose logs -f app
+# View logs (all services)
+docker-compose logs -f
+
+# View logs for specific service
+docker-compose logs -f frontend
+docker-compose logs -f backend
 docker-compose logs -f nginx
 docker-compose logs -f db
 
-# Restart a specific service
-docker-compose restart app
+# Restart specific service
+docker-compose restart frontend
+docker-compose restart backend
 docker-compose restart nginx
+docker-compose restart db
 
 # Stop without removing containers (faster restart)
 docker-compose stop
@@ -317,13 +279,13 @@ docker-compose down -v
 ### **Laravel Commands:**
 ```bash
 # Run any artisan command
-docker-compose exec app php artisan <command>
+docker-compose exec backend php artisan <command>
 
 # Examples:
-docker-compose exec app php artisan route:list
-docker-compose exec app php artisan migrate:status
-docker-compose exec app php artisan config:clear
-docker-compose exec app php artisan cache:clear
+docker-compose exec backend php artisan route:list
+docker-compose exec backend php artisan migrate:status
+docker-compose exec backend php artisan config:clear
+docker-compose exec backend php artisan cache:clear
 ```
 
 ### **Database Commands:**
@@ -346,19 +308,20 @@ Get-Content backup.sql | docker-compose exec -T db mysql -uroot -pdh28042005 esa
 # Navigate to frontend directory first
 cd electronic-e-commerce
 
+### **Frontend Commands:**
+```bash
 # View frontend container status
-docker-compose ps
+docker-compose ps frontend
 
 # View frontend logs (live)
-docker-compose logs -f
+docker-compose logs -f frontend
 
 # Restart frontend
-docker-compose restart
+docker-compose restart frontend
 
-# Rebuild after package.json changes
-docker-compose down
-docker-compose build
-docker-compose up
+# Rebuild frontend after package.json changes
+docker-compose build frontend
+docker-compose up -d frontend
 
 # Access container shell (for debugging)
 docker-compose exec frontend sh
@@ -369,8 +332,8 @@ docker-compose exec frontend npm list
 
 # Clean rebuild
 docker-compose down
-docker-compose build --no-cache
-docker-compose up
+docker-compose build --no-cache frontend
+docker-compose up -d
 ```
 
 ---
@@ -394,14 +357,14 @@ If you want to enable Google Sign-In:
 
 ### **2. Update Environment Files:**
 
-**Backend (.env):**
+**Backend (is-web-project/.env):**
 ```env
 GOOGLE_CLIENT_ID=your-client-id-here
 GOOGLE_CLIENT_SECRET=your-client-secret-here
 GOOGLE_REDIRECT_URI=http://localhost:5173/auth/callback
 ```
 
-**Frontend (.env):**
+**Frontend (electronic-e-commerce/.env):**
 ```env
 VITE_GOOGLE_CLIENT_ID="your-client-id-here"
 VITE_GOOGLE_REDIRECT_URI="http://localhost:5173/auth/callback"
@@ -409,18 +372,16 @@ VITE_GOOGLE_REDIRECT_URI="http://localhost:5173/auth/callback"
 
 ### **3. Restart Services:**
 ```bash
-# Restart backend
-cd is-web-project
-docker-compose restart app
-
-# Restart frontend
-cd electronic-e-commerce
-docker-compose restart
+# From project root
+docker-compose restart backend
+docker-compose restart frontend
 ```
 
 ---
 
 ## 🐛 **Troubleshooting**
+
+All commands run from the project root:
 
 ### **Problem: Docker port already in use**
 ```bash
@@ -428,23 +389,23 @@ docker-compose restart
 netstat -ano | findstr :8000
 netstat -ano | findstr :3306
 
-# Stop conflicting service or change port in docker-compose.yml
+# Stop conflicting service or change port in root docker-compose.yml
 ```
 
 ### **Problem: Permission denied errors**
 ```bash
 # Fix Laravel storage permissions
-docker-compose exec app chmod -R 777 storage bootstrap/cache
+docker-compose exec backend chmod -R 777 storage bootstrap/cache
 ```
 
 ### **Problem: 500 Internal Server Error**
 ```bash
 # Check logs
-docker-compose logs -f app
+docker-compose logs -f backend
 
 # Clear all caches
-docker-compose exec app php artisan optimize:clear
-docker-compose exec app php artisan config:clear
+docker-compose exec backend php artisan optimize:clear
+docker-compose exec backend php artisan config:clear
 ```
 
 ### **Problem: Database connection refused**
@@ -466,40 +427,55 @@ docker-compose restart db
 
 # Restart frontend after .env changes
 cd electronic-e-commerce
-docker-compose restart
+### **Problem: Database connection refused**
+```bash
+# Make sure containers are running
+docker-compose ps
+
+# Check if DB is healthy
+docker-compose logs db
+
+# Restart database
+docker-compose restart db
+```
+
+### **Problem: Frontend can't connect to backend**
+```bash
+# Verify electronic-e-commerce/.env has correct API URL
+# Should be: VITE_BACKEND_API_URL="http://localhost:8000/api"
+
+# Restart frontend after .env changes
+docker-compose restart frontend
 ```
 
 ### **Problem: JWT token errors**
 ```bash
 # Regenerate JWT secret
-docker-compose exec app php artisan jwt:secret
+docker-compose exec backend php artisan jwt:secret
 
 # Clear config
-docker-compose exec app php artisan config:clear
+docker-compose exec backend php artisan config:clear
 
-# Restart app
-docker-compose restart app
+# Restart backend
+docker-compose restart backend
 ```
 
 ### **Problem: npm/dependency issues**
 ```bash
-# Rebuild Docker image without cache
-cd electronic-e-commerce
-docker-compose down
-docker-compose build --no-cache
-docker-compose up
+# Rebuild frontend Docker image without cache
+docker-compose build --no-cache frontend
+docker-compose up -d frontend
 ```
 
 ### **Problem: Port 5173 already in use**
 ```bash
 # Stop the container using the port
-cd electronic-e-commerce
-docker-compose down
+docker-compose stop frontend
 
-# Or change the port in docker-compose.yml:
+# Or change the port in root docker-compose.yml:
 # ports:
 #   - "8080:5173"  # Use 8080 instead
-# Then update Google OAuth redirect URI accordingly
+# Then restart and update Google OAuth redirect URI accordingly
 ```
 
 ---
@@ -508,6 +484,7 @@ docker-compose down
 
 ```
 Do-An-IS402/
+├── docker-compose.yml              # 🆕 ROOT - Orchestrates all services!
 ├── electronic-e-commerce/          # Frontend (React + Vite + Docker)
 │   ├── src/
 │   │   ├── components/            # Reusable components
@@ -517,7 +494,6 @@ Do-An-IS402/
 │   │   └── App.jsx               # Main app component
 │   ├── public/                    # Static assets
 │   ├── Dockerfile                 # Frontend Docker configuration
-│   ├── docker-compose.yml         # Frontend Docker orchestration
 │   ├── nginx.conf                 # Nginx config (production)
 │   ├── package.json
 │   └── .env                       # Frontend environment
@@ -532,9 +508,11 @@ Do-An-IS402/
     │   ├── migrations/            # Database migrations
     │   ├── seeders/               # Database seeders
     │   └── esapp.sql             # Sample data
+    ├── docker/
+    │   ├── php/Dockerfile         # PHP container config
+    │   └── nginx/                 # Nginx config
     ├── routes/
     │   └── api.php               # API routes
-    ├── docker-compose.yml         # Backend Docker configuration
     └── .env                       # Backend environment
 ```
 
@@ -570,10 +548,12 @@ Do-An-IS402/
 
 ### **Daily Development:**
 1. Start Docker Desktop
-2. `cd is-web-project && docker-compose up -d`
-3. `cd ../electronic-e-commerce && docker-compose up`
-4. Code away! ✨ (Hot reload enabled)
-5. Stop: `Ctrl+C` in each terminal, then `docker-compose down` in each folder
+2. From project root: `docker-compose up -d`
+3. Code away! ✨ (Hot reload enabled for both frontend and backend)
+4. View logs: `docker-compose logs -f` (optional)
+5. Stop: `docker-compose down`
+
+**That's it - one command to start everything!**
 
 ### **Before Committing:**
 ```bash
