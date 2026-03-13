@@ -16,8 +16,8 @@ cp is-web-project/.env.example is-web-project/.env
 cp electronic-e-commerce/.env.example electronic-e-commerce/.env
 
 # Optional: Edit .env files to add Google Client ID and SMTP credentials
-MAIL_MAILER=smtp
-MAIL_SCHEME=tls
+MAIL_MAILER=failover
+MAIL_SCHEME=null
 MAIL_HOST=smtp.gmail.com
 MAIL_PORT=587
 MAIL_USERNAME=your-email@gmail.com
