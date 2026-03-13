@@ -21,7 +21,7 @@ docker-compose up -d
 
 ## 📦 **What Runs?**
 
-One command starts **5 containers**:
+One command starts **4 containers**:
 
 | Container | Service | Port | Description |
 |-----------|---------|------|-------------|
@@ -29,7 +29,6 @@ One command starts **5 containers**:
 | `ecommerce-backend` | Laravel PHP | - | Backend application |
 | `ecommerce-nginx` | Nginx | 8000 | Web server for Laravel |
 | `ecommerce-db` | MySQL 8.0 | 3307 | Database |
-| `ecommerce-phpmyadmin` | phpMyAdmin | 8080 | Database management UI |
 
 ## 🎯 **Quick Commands**
 

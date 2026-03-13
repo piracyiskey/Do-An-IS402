@@ -8,7 +8,7 @@
 
 ```bash
 # 1. Clone and navigate
-git clone <repo-url>
+git clone -b main-fix https://github.com/piracyiskey/Do-An-IS402.git
 cd Do-An-IS402
 
 # 2. Setup environment files
@@ -60,7 +60,6 @@ docker-compose stop
 |---------|-----|-------------|
 | Frontend | http://localhost:5173 | - |
 | Backend API | http://localhost:8000/api | - |
-| phpMyAdmin | http://localhost:8080 | root / dh28042005 |
 | MySQL (Workbench) | localhost:3307 | root / dh28042005 |
 
 ---
@@ -97,9 +96,6 @@ docker-compose up -d
 
 ---
 
-## 📚 **Full Guide**
-
-See [SETUP_GUIDE.md](./SETUP_GUIDE.md) for complete documentation.
 
 ---
 

@@ -87,23 +87,6 @@ services:
     networks:
       - ecommerce-network
 
-  # ========================================
-  # PHPMYADMIN - Database Management UI
-  # ========================================
-  phpmyadmin:
-    container_name: ecommerce-phpmyadmin
-    image: phpmyadmin:latest
-    restart: unless-stopped
-    ports:
-      - "8080:80"
-    environment:
-      - PMA_HOST=db
-      - MYSQL_ROOT_PASSWORD=dh28042005
-    depends_on:
-      - db
-    networks:
-      - ecommerce-network
-
 # ========================================
 # NETWORKS
 # ========================================

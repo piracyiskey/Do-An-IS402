@@ -88,7 +88,6 @@ docker-compose exec db bash -c "mysql -uroot -pdh28042005 esapp < /tmp/esapp.sql
 |---------|-----|-------------|
 | **Frontend** | http://localhost:5173 | - |
 | **Backend API** | http://localhost:8000/api | - |
-| **phpMyAdmin** | http://localhost:8080 | root / dh28042005 |
 | **MySQL** | localhost:3307 | root / dh28042005 |
 
 ---
