@@ -14,7 +14,17 @@ cd Do-An-IS402
 # 2. Setup environment files
 cp is-web-project/.env.example is-web-project/.env
 cp electronic-e-commerce/.env.example electronic-e-commerce/.env
-# Optional: Edit .env files to add your Google Client ID
+
+# Optional: Edit .env files to add Google Client ID and SMTP credentials
+MAIL_MAILER=smtp
+MAIL_SCHEME=tls
+MAIL_HOST=smtp.gmail.com
+MAIL_PORT=587
+MAIL_USERNAME=your-email@gmail.com
+MAIL_PASSWORD=your-app-password
+MAIL_FROM_ADDRESS="your-email@gmail.com"
+MAIL_FROM_NAME="${APP_NAME}"
+
 
 # 3. Start all services (one command!)
 docker-compose up -d
