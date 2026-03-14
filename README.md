@@ -1,4 +1,4 @@
-# ĐỒ ÁN MÔN HỌC PHÁT TRIỂN ỨNG DỤNG WEB (IS402)
+# ĐỒ ÁN MÔN HỌC DIỆN TOÁN ĐÁM MÂY (IS402)
 
 ## 🛒 Samsung E-Commerce Platform
 

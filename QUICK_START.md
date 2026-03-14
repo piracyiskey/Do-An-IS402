@@ -8,7 +8,7 @@
 
 ```bash
 # 1. Clone and navigate
-git clone -b main-fix https://github.com/piracyiskey/Do-An-IS402.git
+git clone https://github.com/piracyiskey/Do-An-IS402.git
 cd Do-An-IS402
 
 # 2. Setup environment files
