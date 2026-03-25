@@ -15,27 +15,19 @@ cd Do-An-IS402
 cp is-web-project/.env.example is-web-project/.env
 cp electronic-e-commerce/.env.example electronic-e-commerce/.env
 
-# Optional: Edit .env files to add Google Client ID and SMTP credentials
-MAIL_MAILER=failover
-MAIL_SCHEME=null
-MAIL_HOST=smtp.gmail.com
-MAIL_PORT=587
-MAIL_USERNAME=your-email@gmail.com
-MAIL_PASSWORD=your-app-password
-MAIL_FROM_ADDRESS="your-email@gmail.com"
-MAIL_FROM_NAME="${APP_NAME}"
+# 3. Pull secrets from Azure Key Vault into local untracked file
+# (requires az login first)
+.\scripts\pull-secrets.ps1 -VaultName "kv-esapp-local"
 
+# 4. Start all services (one command!)
+docker compose --env-file .secrets.local.env up -d --build
 
-# 3. Start all services (one command!)
-docker-compose up -d
-
-# 4. Setup backend
-docker-compose exec backend composer install
-docker-compose exec backend php artisan jwt:secret
-docker-compose exec backend php artisan migrate
+# 5. Setup backend
+docker compose exec backend composer install
+docker compose exec backend php artisan migrate
 docker cp is-web-project/database/esapp.sql ecommerce-db:/tmp/esapp.sql
-docker-compose exec db bash -c "mysql -uroot -pdh28042005 esapp < /tmp/esapp.sql"
-docker-compose exec backend php artisan optimize:clear
+docker compose exec db bash -c "mysql -uroot -p\"$MYSQL_ROOT_PASSWORD\" esapp < /tmp/esapp.sql"
+docker compose exec backend php artisan optimize:clear
 
 # ✅ Done! Visit http://localhost:5173
 ```
@@ -47,20 +39,22 @@ docker-compose exec backend php artisan optimize:clear
 ### **Start:**
 ```bash
 # From project root - ONE command starts everything!
-docker-compose up
+docker compose --env-file .secrets.local.env up
 
 # Or run in background:
-docker-compose up -d
+docker compose --env-file .secrets.local.env up -d
 ```
 
 ### **Stop:**
 ```bash
 # From project root
-docker-compose down
+docker compose down
 
 # Stop without removing containers (faster restart):
-docker-compose stop
+docker compose stop
 ```
+
+`docker compose down` is enough to turn everything off.
 
 ---
 
@@ -70,7 +64,7 @@ docker-compose stop
 |---------|-----|-------------|
 | Frontend | http://localhost:5173 | - |
 | Backend API | http://localhost:8000/api | - |
-| MySQL (Workbench) | localhost:3307 | root / dh28042005 |
+| MySQL (Workbench) | localhost:3307 | root / value from `.secrets.local.env` (`MYSQL_ROOT_PASSWORD`) |
 
 ---
 
@@ -78,13 +72,13 @@ docker-compose stop
 
 **500 Error?**
 ```bash
-docker-compose exec backend php artisan optimize:clear
-docker-compose restart backend
+docker compose exec backend php artisan optimize:clear
+docker compose restart backend
 ```
 
 **Can't connect to database?**
 ```bash
-docker-compose restart db
+docker compose restart db
 ```
 
 **Port conflict?**
@@ -94,14 +88,14 @@ docker-compose restart db
 **Frontend not connecting to backend?**
 ```bash
 # Check electronic-e-commerce/.env has: VITE_BACKEND_API_URL="http://localhost:8000/api"
-docker-compose restart frontend
+docker compose restart frontend
 ```
 
 **Container issues?**
 ```bash
-docker-compose down
-docker-compose build --no-cache
-docker-compose up -d
+docker compose down
+docker compose build --no-cache
+docker compose --env-file .secrets.local.env up -d
 ```
 
 ---

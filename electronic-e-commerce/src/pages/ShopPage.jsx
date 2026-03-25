@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
+import { buildApiUrl, buildImageUrl } from '../lib/url';
 
 const ShopPage = () => {
     const [products, setProducts] = useState([]);
@@ -10,9 +11,6 @@ const ShopPage = () => {
     const [hasMore, setHasMore] = useState(true);
     const [errorMsg, setErrorMsg] = useState(null);
     const navigate = useNavigate();
-    
-    // Đảm bảo BASE_URL chính xác để nối vào link ảnh
-    const BASE_URL = 'http://localhost:8000';
 
     const [filters, setFilters] = useState({
         keyword: '',
@@ -43,7 +41,7 @@ const ShopPage = () => {
                 last_id: currentLastId
             };
 
-            const response = await axios.get(`${BASE_URL}/api/products/search`, { params });
+            const response = await axios.get(buildApiUrl('/products/search'), { params });
             
             if (Array.isArray(response.data)) {
                 const data = response.data;
@@ -190,8 +188,7 @@ const ShopPage = () => {
                                 >
                                     <div className="aspect-square w-full mb-6 relative rounded-2xl bg-gray-50 p-6 overflow-hidden">
                                         <img 
-                                            // FIX: Nối thêm BASE_URL vào đây để hiện ảnh
-                                            src={`${product.image_url}`} 
+                                            src={buildImageUrl(product.image_url)} 
                                             alt={product.product_name} 
                                             className="w-full h-full object-contain group-hover:scale-110 transition-transform duration-700" 
                                         />

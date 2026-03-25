@@ -5,6 +5,7 @@ import Footer from "../components/Footer";
 import { Link } from "react-router-dom";
 import { getCart, removeFromCart, updateCartQuantity, clearCart } from "../lib/cartService";
 import api from "../lib/api";
+import { buildImageUrl } from "../lib/url";
 
 // FAQ Component
 const FAQSection = () => {
@@ -104,16 +105,13 @@ const CartItem = ({ item, onRemove, onUpdateQuantity, isUpdating }) => {
   const originalPrice = basePrice + additionalPrice;
   const hasDiscount = salePrice && salePrice < basePrice;
 
-const BASE_URL = 'http://localhost:8000';
-
   return (
     <div className="border-b border-gray-200 py-6">
       <div className="flex gap-4">
         {/* Product Image */}
         <div className="w-24 h-24 flex-shrink-0 bg-gray-50 rounded-lg flex items-center justify-center">
           <img
-            // SỬA DÒNG NÀY: Nối BASE_URL với đường dẫn từ API
-            src={`${item.image_url}`}
+            src={buildImageUrl(item.image_url)}
             alt={item.product_name}
             className="max-w-full max-h-full object-contain"
             

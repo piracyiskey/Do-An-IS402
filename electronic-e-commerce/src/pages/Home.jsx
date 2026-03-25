@@ -13,8 +13,6 @@ function Home() {
     const [computing, setComputing] = useState([]);
     const [loading, setLoading] = useState(true);
 
-    
-    // Link đúng của bạn: http://localhost:8000/images/products/1.webp
     const IMAGE_PATH = `/images/products`;
 
     useEffect(() => {

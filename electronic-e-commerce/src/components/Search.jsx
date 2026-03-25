@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import { Search as SearchIcon, X, Loader2 } from 'lucide-react';
+import { buildApiUrl } from '../lib/url';
 
 const Search = () => {
   const [keyword, setKeyword] = useState("");
@@ -28,7 +29,7 @@ const Search = () => {
       if (keyword.trim().length > 1) {
         setLoading(true);
         try {
-          const response = await axios.get(`http://localhost:8000/api/products/search`, {
+          const response = await axios.get(buildApiUrl('/products/search'), {
             params: { keyword: keyword, limit: 5 }
           });
           setResults(response.data);
