@@ -22,12 +22,14 @@ cp electronic-e-commerce/.env.example electronic-e-commerce/.env
 # 4. Start all services (one command!)
 docker compose --env-file .secrets.local.env up -d --build
 
-# 5. Setup backend
-docker compose exec backend composer install
-docker compose exec backend php artisan migrate
-docker cp is-web-project/database/esapp.sql ecommerce-db:/tmp/esapp.sql
-docker compose exec db bash -c "mysql -uroot -p\"$MYSQL_ROOT_PASSWORD\" esapp < /tmp/esapp.sql"
+# 5. Initialize database (repeatable)
+# Order: migrate schema -> seed baseline catalog/users/roles
+docker compose exec backend composer run db:init
 docker compose exec backend php artisan optimize:clear
+
+# Seed modes:
+# - DB_SEED_MODE=baseline  -> minimal demo dataset
+# - DB_SEED_MODE=snapshot  -> full dataset from is-web-project/database/esapp.sql
 
 # ✅ Done! Visit http://localhost:5173
 ```
@@ -79,6 +81,14 @@ docker compose restart backend
 **Can't connect to database?**
 ```bash
 docker compose restart db
+docker compose exec backend composer run db:init
+```
+
+**Reset to empty DB and re-bootstrap (repeatable):**
+```bash
+docker compose down -v
+docker compose --env-file .secrets.local.env up -d --build
+docker compose exec backend composer run db:init
 ```
 
 **Port conflict?**

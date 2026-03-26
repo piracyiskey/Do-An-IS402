@@ -6,6 +6,10 @@ use App\Http\Controllers\ProductController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\GoogleController;
+use App\Http\Controllers\HealthController;
+
+// Health check endpoint (public, no auth required)
+Route::get('/health', [HealthController::class, 'check']);
 
 Route::middleware('check.refresh.token')->group(function () {
     Route::post('/register', [AuthController::class, 'post_register']);
