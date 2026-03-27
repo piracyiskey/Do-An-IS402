@@ -2,18 +2,21 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
 use App\Models\Cart;
 use App\Models\CartItem;
 use App\Repositories\ICartRepository;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+
 class CartController extends Controller
 {
     protected $cartRepository;
+
     public function __construct(ICartRepository $cartRepository)
     {
         $this->cartRepository = $cartRepository;
     }
+
     public function cart(Request $request)
     {
         $cartItems = $this->cartRepository->getCartInfo($request->user()->getKey());
@@ -23,12 +26,14 @@ class CartController extends Controller
                 'message' => 'Cart is empty.',
             ], 404);
         }
+
         return response()->json([
             'success' => true,
             'data' => $cartItems,
             'total_price' => $this->cartRepository->calculateCartTotalPrice($cartItems),
         ]);
     }
+
     public function addItem(Request $request)
     {
         // Validate the request
@@ -74,7 +79,7 @@ class CartController extends Controller
             'message' => 'Item added to cart',
             'product_id' => $validated['product_id'],
             'variant_id' => $validated['variant_id'],
-            'quantity' => $validated['quantity']
+            'quantity' => $validated['quantity'],
         ]);
     }
 
@@ -86,15 +91,15 @@ class CartController extends Controller
         if (empty($cart_item_id)) {
             return response()->json([
                 'success' => false,
-                'message' => 'cart_item_id is required.'
+                'message' => 'cart_item_id is required.',
             ], 422);
         }
 
         $cartItem = CartItem::where('cart_item_id', $cart_item_id)->first();
-        if (!$cartItem) {
+        if (! $cartItem) {
             return response()->json([
                 'success' => false,
-                'message' => 'Cart item not found.'
+                'message' => 'Cart item not found.',
             ], 404);
         }
 
@@ -102,31 +107,32 @@ class CartController extends Controller
 
         return response()->json([
             'success' => true,
-            'message' => 'Cart item removed successfully.'
+            'message' => 'Cart item removed successfully.',
         ]);
     }
+
     public function clearCart(Request $request)
     {
         $user = $request->user();
         $cart = Cart::where('user_id', $user->getKey())->first();
 
-        if (!$cart) {
+        if (! $cart) {
             return response()->json([
                 'success' => false,
-                'message' => 'Cart not found.'
+                'message' => 'Cart not found.',
             ], 404);
         }
 
-        
         DB::transaction(function () use ($cart) {
             CartItem::where('cart_id', $cart->cart_id)->delete();
         });
 
         return response()->json([
             'success' => true,
-            'message' => 'Cart cleared successfully.'
+            'message' => 'Cart cleared successfully.',
         ]);
     }
+
     public function updateCartItemQuantity(Request $request)
     {
         $validated = $request->validate([
@@ -134,10 +140,10 @@ class CartController extends Controller
             'quantity' => 'required|integer|min:1',
         ]);
         $cartItem = CartItem::where('cart_item_id', $validated['cart_item_id'])->first();
-        if (!$cartItem) {
+        if (! $cartItem) {
             return response()->json([
                 'success' => false,
-                'message' => 'Cart item not found.'
+                'message' => 'Cart item not found.',
             ], 404);
         }
 

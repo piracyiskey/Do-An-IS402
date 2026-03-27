@@ -474,9 +474,6 @@ const AdminDashboard = () => {
           {/* Filter */}
           <div className="flex gap-2 mb-4">
             {["all", "pending", "paid"].map((f) => {
-              const isActive = filter === f;
-              const classes = `px-4 py-2 rounded-full text-sm font-medium transition ${isActive ? 'bg-gray-900 text-white' : 'bg-white hover:bg-gray-50'}`;
-              const inlineStyle = !isActive && f === 'all' ? { backgroundColor: '#ffffff', color: '#000000' } : undefined;
               return (
                <button
                   key={f}

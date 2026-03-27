@@ -2,13 +2,12 @@
 
 namespace App\Http\Middleware;
 
+use App\Models\RefreshToken;
 use Closure;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Symfony\Component\HttpFoundation\Response;
-use App\Models\RefreshToken;
-use PHPOpenSourceSaver\JWTAuth\Facades\JWTAuth;
 use PHPOpenSourceSaver\JWTAuth\Exceptions\JWTException;
+use PHPOpenSourceSaver\JWTAuth\Facades\JWTAuth;
 
 class CheckRefreshToken
 {
@@ -21,12 +20,13 @@ class CheckRefreshToken
                 if ($user) {
                     Auth::setUser($user);
                     $user->load('roles'); // Load roles relationship
+
                     // Instead of blocking, return a friendly message indicating they're already logged in
                     return response()->json([
                         'success' => true,
                         'message' => 'You are already logged in.',
                         'user' => $user,
-                        'redirect' => '/'
+                        'redirect' => '/',
                     ], 200);
                 }
             } catch (JWTException $e) {
@@ -41,6 +41,7 @@ class CheckRefreshToken
             if ($user) {
                 $user->load('roles');
             }
+
             return response()->json([
                 'success' => true,
                 'access_token' => $accessToken,
@@ -59,9 +60,10 @@ class CheckRefreshToken
             ->where('expires_at', '>', now())
             ->first();
 
-        if (!$refreshToken || !$refreshToken->user) {
+        if (! $refreshToken || ! $refreshToken->user) {
             return null;
         }
+
         return JWTAuth::fromUser($refreshToken->user);
     }
 }

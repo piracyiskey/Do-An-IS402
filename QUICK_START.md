@@ -38,6 +38,8 @@ docker compose exec backend php artisan optimize:clear
 
 ## 🔄 **Daily Use**
 
+> **Important:** Use `--env-file .secrets.local.env` for start/recreate commands so backend secrets (like `DB_PASSWORD`, `JWT_SECRET`, `APP_KEY`) are loaded correctly.
+
 ### **Start:**
 ```bash
 # From project root - ONE command starts everything!
@@ -99,6 +101,14 @@ docker compose exec backend composer run db:init
 ```bash
 # Check electronic-e-commerce/.env has: VITE_BACKEND_API_URL="http://localhost:8000/api"
 docker compose restart frontend
+
+# If API endpoints return 500 after restart/recreate, clear backend cache
+docker compose --env-file .secrets.local.env exec backend php artisan optimize:clear
+```
+
+If you restarted services without `--env-file .secrets.local.env`, recreate them with:
+```bash
+docker compose --env-file .secrets.local.env up -d
 ```
 
 **Container issues?**

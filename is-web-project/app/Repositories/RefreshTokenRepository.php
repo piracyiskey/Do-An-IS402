@@ -2,7 +2,6 @@
 
 namespace App\Repositories;
 
-use App\Models\RefreshToken;
 use App\Models\User;
 
 class RefreshTokenRepository
@@ -25,17 +24,19 @@ class RefreshTokenRepository
 
         return $refreshToken;
     }
+
     public function generateRefreshTokenForUser(User $user)
     {
         $refreshToken = null;
         if ($user->refreshTokens()->first() == null) {
             $refreshToken = $this->generateRefreshToken($user);
-        } else if ($user->refreshTokens()->first()->expires_at <= now()) {
+        } elseif ($user->refreshTokens()->first()->expires_at <= now()) {
             $user->refreshTokens()->delete();
             $refreshToken = $this->generateRefreshToken($user);
         } else {
             $refreshToken = $user->refreshTokens()->first()->token;
         }
+
         return $refreshToken;
     }
 }

@@ -7,7 +7,9 @@ use Illuminate\Database\Eloquent\Model;
 class Product extends Model
 {
     protected $table = 'products';
+
     protected $primaryKey = 'product_id';
+
     protected $fillable = [
         'product_name',
         'image_url',
@@ -31,12 +33,12 @@ class Product extends Model
         'meta_title',
         'meta_description',
     ];
+
     protected $casts = [
         'specification' => 'array', // JSON cast to array
         'dimensions' => 'array', // JSON cast to array
         'is_featured' => 'boolean',
     ];
-
 
     public function brand()
     {
@@ -55,7 +57,7 @@ class Product extends Model
 
     public function images()
     {
-    return $this->hasMany(ProductImage::class, 'product_id', 'product_id');
+        return $this->hasMany(ProductImage::class, 'product_id', 'product_id');
     }
 
     public function reviews()

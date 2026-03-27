@@ -1,5 +1,5 @@
 import React from 'react';
-import { User, ShoppingCart, Search, LogOut } from 'lucide-react';
+import { User, ShoppingCart, LogOut } from 'lucide-react';
 
 // DỮ LIỆU CỦA MENU POP-UP
 const accountMenuItems = [
@@ -20,7 +20,7 @@ const accountMenuItems = [
  * @param {boolean} props.isVisible - Trạng thái hiển thị (true/false).
  * @param {function} props.onClose - Hàm xử lý khi đóng popup (ví dụ: click ra ngoài).
  */
-function UserAccountPopup({ isVisible, onClose }) {
+function UserAccountPopup({ isVisible }) {
   if (!isVisible) return null;
 
   return (
@@ -76,3 +76,5 @@ function UserAccountPopup({ isVisible, onClose }) {
     </div>
   );
 }
+
+export default UserAccountPopup;

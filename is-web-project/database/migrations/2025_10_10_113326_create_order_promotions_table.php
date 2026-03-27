@@ -1,10 +1,8 @@
 <?php
 
-
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
-
 
 return new class extends Migration
 {
@@ -19,7 +17,6 @@ return new class extends Migration
             $table->foreign('promotion_id')->references('promotion_id')->on('promotions');
         });
     }
-
 
     public function down(): void
     {

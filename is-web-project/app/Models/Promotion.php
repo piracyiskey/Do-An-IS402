@@ -7,7 +7,9 @@ use Illuminate\Database\Eloquent\Model;
 class Promotion extends Model
 {
     protected $table = 'promotions';
+
     protected $primaryKey = 'promotion_id';
+
     protected $fillable = [
         'promotion_name',
         'promotion_code',
@@ -24,12 +26,14 @@ class Promotion extends Model
         'applicable_categories',
         'applicable_products',
     ];
+
     protected $casts = [
         'discount_type' => 'string',
         'is_active' => 'boolean',
         'applicable_categories' => 'array', // JSON cast to array
         'applicable_products' => 'array', // JSON cast to array
     ];
+
     public $timestamps = false;
 
     public function orders()

@@ -2,23 +2,21 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
-use App\Enums\ProductType;
-use Illuminate\Support\Facades\DB;
-use App\Repositories\IProductRepository;
-use App\Repositories\ProductRepository;
 use App\Enums\CategoryMap;
-use App\Models\Product;
 use App\Models\Category;
-use Illuminate\Support\Facades\Log;
+use App\Models\Product;
+use App\Repositories\IProductRepository;
+use Illuminate\Http\Request;
 
 class ProductController extends Controller
 {
     private readonly IProductRepository $productRepository;
+
     public function __construct(IProductRepository $productRepository)
     {
         $this->productRepository = $productRepository;
     }
+
     public function getRecommendedProducts(Request $request)
     {
         $request->merge($request->route()->parameters());
@@ -29,11 +27,13 @@ class ProductController extends Controller
         if ($request->input('last_id') === null) {
             $request->merge(['last_id' => 0]);
         }
+
         return $this->productRepository->getTitleRecomendedProducts(
             $request->input('limit'),
             $request->input('last_id')
         );
     }
+
     public function getProductDetails(Request $request)
     {
         $request->merge($request->route()->parameters());
@@ -41,16 +41,17 @@ class ProductController extends Controller
             'product_id' => 'required|integer|min:0',
         ]);
 
-        $product =  $this->productRepository->getProductByID(
+        $product = $this->productRepository->getProductByID(
             $request->input('product_id')
         );
         $images = $this->productRepository->getProductImages(
             $request->input('product_id')
         );
+
         return response()->json([
             'success' => true,
             'product_variants' => $this->productRepository->calculatePriceForListProductVariants($product),
-            'images' => $images
+            'images' => $images,
         ]);
     }
 
@@ -63,7 +64,7 @@ class ProductController extends Controller
             'last_id' => 'integer|min:0',
             'limit' => 'integer|min:1|max:100',
             'sort' => 'nullable|string|in:asc,desc,none',
-            'child_slugs' => 'nullable|string'
+            'child_slugs' => 'nullable|string',
         ]);
 
         $categories = $this->parseCsv($request->input('child_slugs'));
@@ -71,9 +72,9 @@ class ProductController extends Controller
             $categories = array_keys(CategoryMap::$childToParent);
         } else {
             foreach ($categories as $slug) {
-                if (!array_key_exists($slug, CategoryMap::$childToParent)) {
+                if (! array_key_exists($slug, CategoryMap::$childToParent)) {
                     return response()->json([
-                        'message' => "Category slug '$slug' not found"
+                        'message' => "Category slug '$slug' not found",
                     ], 404);
                 }
             }
@@ -89,6 +90,7 @@ class ProductController extends Controller
             child_slugs: $categories
         );
     }
+
     private function parseCsv(?string $value): ?array
     {
         if ($value === null || trim($value) === '') {
@@ -97,17 +99,18 @@ class ProductController extends Controller
 
         return array_values(array_filter(
             array_map('trim', explode(',', $value)),
-            fn($v) => $v !== ''
+            fn ($v) => $v !== ''
         ));
     }
+
     public function searchMobile(Request $request)
     {
         $ctpc = CategoryMap::$childToParent;
         $childSlug = $request->route('child_slug');
 
-        if (!isset($ctpc[$childSlug]) || $ctpc[$childSlug] !== 'mobile') {
+        if (! isset($ctpc[$childSlug]) || $ctpc[$childSlug] !== 'mobile') {
             return response()->json([
-                'message' => 'Category not found'
+                'message' => 'Category not found',
             ], 404);
         }
 
@@ -124,7 +127,6 @@ class ProductController extends Controller
             'limit' => 'integer|min:1|max:100',
             'sort' => 'nullable|string|in:asc,desc',
         ]);
-
 
         return $this->productRepository->searchMobile(
             slug: $childSlug,
@@ -147,9 +149,9 @@ class ProductController extends Controller
         $ctpc = CategoryMap::$childToParent;
         $childSlug = $request->route('child_slug');
 
-        if (!isset($ctpc[$childSlug]) || $ctpc[$childSlug] !== 'tv-av') {
+        if (! isset($ctpc[$childSlug]) || $ctpc[$childSlug] !== 'tv-av') {
             return response()->json([
-                'message' => 'Category not found'
+                'message' => 'Category not found',
             ], 404);
         }
 
@@ -165,6 +167,7 @@ class ProductController extends Controller
             'limit' => 'integer|min:1|max:100',
             'sort' => 'nullable|string|in:asc,desc',
         ]);
+
         return $this->productRepository->searchTV(
             slug: $childSlug,
             keyword: $request->input('keyword'),
@@ -179,31 +182,32 @@ class ProductController extends Controller
             sort: $request->input('sort', 'desc')
         );
     }
+
     public function searchComputing(Request $request)
     {
         $ctpc = CategoryMap::$childToParent;
         $childSlug = $request->route('child_slug');
 
         // Parent category slug – adjust if needed (e.g. 'computing', 'laptops', etc.)
-        if (!isset($ctpc[$childSlug]) || $ctpc[$childSlug] !== 'computing-displays') {
+        if (! isset($ctpc[$childSlug]) || $ctpc[$childSlug] !== 'computing-displays') {
             return response()->json([
-                'message' => 'Category not found'
+                'message' => 'Category not found',
             ], 404);
         }
 
         $request->validate([
-            'keyword'   => 'nullable|string',
-            'battery'   => 'nullable|string',
-            'graphics'  => 'nullable|string',  // CHANGED: 'graphic' → 'graphics'
-            'ram'       => 'nullable|string',
-            'storage'   => 'nullable|string',
+            'keyword' => 'nullable|string',
+            'battery' => 'nullable|string',
+            'graphics' => 'nullable|string',  // CHANGED: 'graphic' → 'graphics'
+            'ram' => 'nullable|string',
+            'storage' => 'nullable|string',
             'processor' => 'nullable|string',
-            'color'     => 'nullable|string',
+            'color' => 'nullable|string',
             'min_price' => 'nullable|numeric|min:0',
             'max_price' => 'nullable|numeric|min:0',
-            'last_id'   => 'integer|min:0',
-            'limit'     => 'integer|min:1|max:100',
-            'sort'      => 'nullable|string|in:asc,desc',
+            'last_id' => 'integer|min:0',
+            'limit' => 'integer|min:1|max:100',
+            'sort' => 'nullable|string|in:asc,desc',
         ]);
 
         return $this->productRepository->searchComputing(
@@ -224,11 +228,11 @@ class ProductController extends Controller
     }
     // app/Http/Controllers/ProductController.php
 
-public function show($id)
-{
-    // Phải viết hoa chữ P và đảm bảo đã import Model Product ở đầu file
-    $product = Product::with('images')->where('product_id', $id)->first();
-    
-    return response()->json($product);
-}
+    public function show($id)
+    {
+        // Phải viết hoa chữ P và đảm bảo đã import Model Product ở đầu file
+        $product = Product::with('images')->where('product_id', $id)->first();
+
+        return response()->json($product);
+    }
 }

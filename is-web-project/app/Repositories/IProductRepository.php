@@ -1,16 +1,17 @@
 <?php
 
-
 namespace App\Repositories;
-
-use App\Models;
 
 interface IProductRepository
 {
     public function getTitleRecomendedProducts(int $limit, int $last_id = 0);
+
     public function getTitleProductsByCategory(string $slug, int $limit, int $last_id = 0);
+
     public function getProductByID(int $product_id);
+
     public function calculatePriceForListProductVariants(array $products);
+
     public function searchMobile(
         ?string $slug = null,
         ?string $keyword = null,
@@ -25,6 +26,7 @@ interface IProductRepository
         int $limit = 20,
         string $sort = 'desc' // 'asc' or 'desc'
     );
+
     public function searchTV(
         ?string $slug = null,
         ?string $keyword = null,
@@ -38,6 +40,7 @@ interface IProductRepository
         int $limit = 20,
         string $sort = 'desc'           // 'asc' or 'desc'
     );
+
     public function searchComputing(
         ?string $slug = null,
         ?string $keyword = null,
@@ -53,6 +56,7 @@ interface IProductRepository
         int $limit = 20,
         string $sort = 'desc'
     );
+
     public function searchAll(
         ?string $keyword = null,
         ?float $min_price = null,
@@ -62,5 +66,6 @@ interface IProductRepository
         string $sort = 'none',
         ?array $child_slugs = null
     );
-    public function getProductImages(int $product_id): array; 
+
+    public function getProductImages(int $product_id): array;
 }

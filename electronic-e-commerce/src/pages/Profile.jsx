@@ -12,8 +12,6 @@ import {
 } from "lucide-react";
 import api from "../lib/api";
 
-const API_BASE_URL = import.meta.env.VITE_BACKEND_API_URL;
-
 export default function Profile() {
   const navigate = useNavigate();
   const [user, setUser] = useState(null);
@@ -36,7 +34,7 @@ export default function Profile() {
         setUser(userData);
         // Cập nhật localStorage với data mới nhất
         localStorage.setItem("user", JSON.stringify(userData));
-      } catch (error) {
+      } catch {
         // Nếu lỗi, thử lấy từ localStorage
         const storedUser = localStorage.getItem("user");
         if (storedUser) {

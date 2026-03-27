@@ -2,9 +2,9 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
 use App\Models\Order;
 use App\Models\OrderItem;
+use Illuminate\Http\Request;
 
 class AdminController extends Controller
 {
@@ -18,15 +18,15 @@ class AdminController extends Controller
     public function getAllOrders(Request $request)
     {
         $user = $request->user();
-        if (!$this->isAdmin($user)) {
+        if (! $this->isAdmin($user)) {
             return response()->json([
                 'success' => false,
-                'message' => 'Unauthorized access.'
+                'message' => 'Unauthorized access.',
             ], 403);
         }
 
         $orders = Order::with('user')->orderBy('created_at', 'desc')->get();
-        
+
         return response()->json([
             'success' => true,
             'orders' => $orders,
@@ -37,18 +37,18 @@ class AdminController extends Controller
     public function getOrderDetails(Request $request, $order_id)
     {
         $user = $request->user();
-        if (!$this->isAdmin($user)) {
+        if (! $this->isAdmin($user)) {
             return response()->json([
                 'success' => false,
-                'message' => 'Unauthorized access.'
+                'message' => 'Unauthorized access.',
             ], 403);
         }
 
         $order = Order::with('user')->where('order_id', $order_id)->first();
-        if (!$order) {
+        if (! $order) {
             return response()->json([
                 'success' => false,
-                'message' => 'Order not found.'
+                'message' => 'Order not found.',
             ], 404);
         }
 
@@ -65,33 +65,33 @@ class AdminController extends Controller
     public function is_pay(Request $request)
     {
         $user = $request->user();
-        if (!$this->isAdmin($user)) {
+        if (! $this->isAdmin($user)) {
             return response()->json([
                 'success' => false,
-                'message' => 'Unauthorized access.'
+                'message' => 'Unauthorized access.',
             ], 403);
         }
-        
+
         $order_id = $request->query('order_id');
-        if (!$order_id) {
+        if (! $order_id) {
             return response()->json([
                 'success' => false,
-                'message' => 'order_id is required.'
+                'message' => 'order_id is required.',
             ], 422);
         }
 
         $order = Order::where('order_id', $order_id)->first();
-        if (!$order) {
+        if (! $order) {
             return response()->json([
                 'success' => false,
-                'message' => 'Order not found.'
+                'message' => 'Order not found.',
             ], 404);
         }
 
         if ($order->payment_status === 'paid') {
             return response()->json([
                 'success' => false,
-                'message' => 'Order is already paid.'
+                'message' => 'Order is already paid.',
             ], 400);
         }
 

@@ -1,6 +1,9 @@
 <?php
+
 namespace App\Enums;
-enum ProductType: string {
+
+enum ProductType: string
+{
     case COMPUTING = 'computing';
     case MOBILE = 'mobile';
     case TELEVISION = 'tvs';

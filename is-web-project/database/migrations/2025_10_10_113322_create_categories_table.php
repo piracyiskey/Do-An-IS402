@@ -1,10 +1,8 @@
 <?php
 
-
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
-
 
 return new class extends Migration
 {
@@ -22,11 +20,9 @@ return new class extends Migration
             $table->text('meta_description')->nullable();
             $table->timestamp('created_at')->useCurrent();
 
-
             $table->foreign('parent_id')->references('category_id')->on('categories')->onDelete('set null');
         });
     }
-
 
     public function down(): void
     {

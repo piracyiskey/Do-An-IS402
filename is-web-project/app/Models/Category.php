@@ -7,7 +7,9 @@ use Illuminate\Database\Eloquent\Model;
 class Category extends Model
 {
     protected $table = 'categories';
+
     protected $primaryKey = 'category_id';
+
     protected $fillable = [
         'category_name',
         'slug',
@@ -18,6 +20,7 @@ class Category extends Model
         'meta_title',
         'meta_description',
     ];
+
     public $timestamps = false;
 
     public function parent()

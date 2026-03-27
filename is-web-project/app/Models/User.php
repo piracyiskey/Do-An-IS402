@@ -8,7 +8,9 @@ use PHPOpenSourceSaver\JWTAuth\Contracts\JWTSubject;
 class User extends Authenticatable implements JWTSubject
 {
     protected $table = 'users';
+
     protected $primaryKey = 'user_id';
+
     protected $fillable = [
         'email',
         'password_hash',
@@ -18,10 +20,11 @@ class User extends Authenticatable implements JWTSubject
         'date_of_birth',
         'gender',
         'email_verified',
-        'reward_points', 
+        'reward_points',
         'verification_code',
         'membership_tier_id',
     ];
+
     protected $casts = [
         'email_verified' => 'boolean',
         'gender' => 'string', // ENUM cast to string
@@ -31,10 +34,12 @@ class User extends Authenticatable implements JWTSubject
     {
         return $this->belongsToMany(Role::class, 'user_roles', 'user_id', 'role_id');
     }
+
     public function membershipTier()
     {
         return $this->belongsTo(MembershipTier::class, 'membership_tier_id');
     }
+
     public function addresses()
     {
         return $this->hasMany(Address::class, 'user_id');
@@ -54,10 +59,12 @@ class User extends Authenticatable implements JWTSubject
     {
         return $this->hasMany(Review::class, 'user_id');
     }
+
     public function refreshtokens()
     {
         return $this->hasMany(RefreshToken::class, 'user_id');
     }
+
     /**
      * Get the password for the user.
      */

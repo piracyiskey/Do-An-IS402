@@ -64,7 +64,6 @@ api.interceptors.request.use(
 api.interceptors.response.use(
   (response) => {
     const user = response.data.user;
-    const accessToken = response.data.access_token;
     
     // Save user data if provided
     if (user) {

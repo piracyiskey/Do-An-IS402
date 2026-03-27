@@ -11,10 +11,10 @@ class PromotionController extends Controller
     {
         // $code comes from route param; ensure it's present
         $code = $request->query('code');
-        if (empty($code) || !is_string($code)) {
+        if (empty($code) || ! is_string($code)) {
             return response()->json([
                 'exists' => false,
-                'message' => 'Promotion code is required.'
+                'message' => 'Promotion code is required.',
             ], 422);
         }
 

@@ -12,7 +12,7 @@ class EsappSnapshotSeeder extends Seeder
     {
         $sqlPath = database_path('esapp.sql');
 
-        if (!file_exists($sqlPath)) {
+        if (! file_exists($sqlPath)) {
             throw new RuntimeException("Snapshot SQL file not found at: {$sqlPath}");
         }
 
@@ -59,7 +59,7 @@ class EsappSnapshotSeeder extends Seeder
         while (($line = fgets($handle)) !== false) {
             $trimmed = ltrim($line);
 
-            if (!$collecting) {
+            if (! $collecting) {
                 if (str_starts_with($trimmed, 'INSERT INTO `')) {
                     $collecting = true;
                     $buffer = $line;
@@ -70,7 +70,7 @@ class EsappSnapshotSeeder extends Seeder
 
             $buffer .= $line;
 
-            if (!str_contains($line, ';')) {
+            if (! str_contains($line, ';')) {
                 continue;
             }
 
@@ -81,7 +81,7 @@ class EsappSnapshotSeeder extends Seeder
                     'sql' => $buffer,
                 ];
 
-                if (!in_array($table, $tableOrder, true)) {
+                if (! in_array($table, $tableOrder, true)) {
                     $tableOrder[] = $table;
                 }
             }

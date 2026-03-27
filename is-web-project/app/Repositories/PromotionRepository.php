@@ -2,10 +2,7 @@
 
 namespace App\Repositories;
 
-use App\Models;
 use App\Models\Promotion;
-use App\Repositories\IPromotionRepository;
-use Illuminate\Support\Facades\DB;
 
 class PromotionRepository implements IPromotionRepository
 {
@@ -17,6 +14,7 @@ class PromotionRepository implements IPromotionRepository
         } elseif ($promotion->discount_type === 'fixed_amount') {
             return min($max_discount, $promotion->discount_value);
         }
+
         return 0;
     }
 }

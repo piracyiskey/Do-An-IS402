@@ -38,6 +38,12 @@
         }
     },
     "scripts": {
+        "lint": [
+            "@php vendor/bin/pint --test"
+        ],
+        "build": [
+            "@php artisan optimize"
+        ],
         "setup": [
             "composer install",
             "@php -r \"file_exists('.env') || copy('.env.example', '.env');\"",
