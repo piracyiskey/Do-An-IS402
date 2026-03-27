@@ -1,6 +1,6 @@
 <?php
 
-test('api route file contains smoke-critical auth product cart and order routes', function () {
+test('api routes file contains smoke-critical auth product cart and order routes', function () {
     $apiRoutes = file_get_contents(__DIR__.'/../../routes/api.php');
 
     expect($apiRoutes)->not->toBeFalse();

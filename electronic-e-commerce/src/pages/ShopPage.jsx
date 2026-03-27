@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import Navbar from "../components/Navbar";
@@ -64,8 +64,14 @@ const ShopPage = () => {
         }
     }, [filters]);
 
+    const fetchProductsRef = useRef(fetchProducts);
+
     useEffect(() => {
-        fetchProducts(true);
+        fetchProductsRef.current = fetchProducts;
+    }, [fetchProducts]);
+
+    useEffect(() => {
+        fetchProductsRef.current(true);
     }, []);
 
     const handleCategoryToggle = (slug) => {
