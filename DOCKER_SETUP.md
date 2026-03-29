@@ -18,6 +18,7 @@ docker-compose up
 # From project root
 docker-compose up -d
 ```
+    // "predeploy:gate": "npm --prefix electronic-e-commerce run lint && npm --prefix electronic-e-commerce run build && npm --prefix electronic-e-commerce run test:run && cd is-web-project && php vendor/bin/pint --test app bootstrap/app.php config database routes tests && php artisan config:clear && php artisan test && php artisan optimize"
 
 ## 📦 **What Runs?**
 

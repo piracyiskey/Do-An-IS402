@@ -39,7 +39,7 @@
     },
     "scripts": {
         "lint": [
-            "@php vendor/bin/pint --test"
+            "@php vendor/bin/pint --test app bootstrap/app.php config database routes tests"
         ],
         "build": [
             "@php artisan optimize"
