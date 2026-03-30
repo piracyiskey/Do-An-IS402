@@ -1,1 +1,6 @@
 .secrets.local.env
+.secrets.*.env
+
+# Local runtime env files
+is-web-project/.env
+electronic-e-commerce/.env

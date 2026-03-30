@@ -3,7 +3,8 @@
   "private": true,
   "scripts": {
     "predeploy:frontend": "npm --prefix electronic-e-commerce run lint && npm --prefix electronic-e-commerce run build && npm --prefix electronic-e-commerce run test:run",
-    "predeploy:backend": "composer --working-dir=is-web-project run lint && composer --working-dir=is-web-project run test && composer --working-dir=is-web-project run build",
+    "predeploy:backend": "composer --working-dir=is-web-project run lint && composer --working-dir=is-web-project run test",
+    "predeploy:backend:build-cache": "composer --working-dir=is-web-project run build",
     "predeploy:gate": "npm run predeploy:frontend && npm run predeploy:backend"
   }
 }
