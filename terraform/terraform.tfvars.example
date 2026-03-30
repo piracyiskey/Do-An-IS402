@@ -1,0 +1,38 @@
+# Copy this to terraform.tfvars and fill in your values
+
+# Resource Group (must already exist)
+resource_group_name = "rg-esapp"
+
+# Basic config
+location     = "southeastasia"
+environment  = "dev"  # or "staging"
+project_name = "esapp"
+
+# Networking (adjust as needed)
+vnet_cidr      = "10.0.0.0/16"
+aks_subnet_cidr = "10.0.1.0/24"
+db_subnet_cidr  = "10.0.2.0/24"
+
+# AKS
+aks_kubernetes_version = "1.27"
+aks_node_count         = 3
+aks_vm_size            = "Standard_B2s_v2"  # Supported in many SEA subscriptions
+
+# Database
+mysql_version            = "8.0.21"
+mysql_admin_username     = "azureuser"
+mysql_admin_password     = "ChangeMe@12345"  # CHANGE THIS!
+mysql_sku_name           = "GP_Standard_D2ds_v4"  # More broadly supported
+mysql_allocated_storage  = 20
+
+# Container Registry
+acr_sku = "Basic"
+
+# Redis Cache
+redis_sku_name            = "Basic"
+redis_family              = "C"
+redis_capacity            = 0
+redis_enable_non_ssl_port = false
+
+# Key Vault
+keyvault_sku = "standard"
