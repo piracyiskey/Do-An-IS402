@@ -1,0 +1,18 @@
+.secrets.local.env
+.secrets.*.env
+
+# Local runtime env files
+is-web-project/.env
+electronic-e-commerce/.env
+
+# Terraform state files
+terraform/terraform.tfvars
+terraform/.terraform/
+.terraform/
+terraform/terraform.tfstate
+terraform/terraform.tfstate.backup
+terraform.tfstate
+terraform.tfstate.backup
+
+# Ignore Laravel log file
+is-web-project/storage/logs/laravel.log
