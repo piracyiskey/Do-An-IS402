@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import axios from 'axios';
 import { useParams, useNavigate } from 'react-router-dom';
 import Navbar from "../components/Navbar";
@@ -63,13 +63,19 @@ const MobilePage = () => {
         } finally {
             setLoading(false);
         }
-    }, [child_slug, filters]);
+    }, [BASE_URL, child_slug, filters]);
+
+    const fetchProductsRef = useRef(fetchProducts);
+
+    useEffect(() => {
+        fetchProductsRef.current = fetchProducts;
+    }, [fetchProducts]);
 
     useEffect(() => {
         if (!child_slug) {
             navigate('/mobile/galaxy-smartphone');
         } else {
-            fetchProducts(true);
+            fetchProductsRef.current(true);
         }
     }, [child_slug, navigate]);
 

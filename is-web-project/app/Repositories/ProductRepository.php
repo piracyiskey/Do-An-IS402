@@ -2,7 +2,6 @@
 
 namespace App\Repositories;
 
-use App\Repositories\IProductRepository;
 use Illuminate\Support\Facades\DB;
 
 class ProductRepository implements IProductRepository
@@ -17,7 +16,7 @@ class ProductRepository implements IProductRepository
             LIMIT :limit
         ', [
             'last_id' => $last_id,
-            'limit' => $limit
+            'limit' => $limit,
         ]);
     }
 
@@ -62,6 +61,7 @@ class ProductRepository implements IProductRepository
 
         return $products;
     }
+
     public function getProductImages(int $product_id): array
     {
         return DB::select('
@@ -70,6 +70,7 @@ class ProductRepository implements IProductRepository
             WHERE product_id = :product_id
         ', ['product_id' => $product_id]);
     }
+
     public function searchAll(
         ?string $keyword = null,
         ?float $min_price = null,
@@ -79,7 +80,7 @@ class ProductRepository implements IProductRepository
         string $sort = 'none',
         ?array $child_slugs = null
     ) {
-        $query = "
+        $query = '
         SELECT DISTINCT
             p.product_id,
             p.product_name,
@@ -89,11 +90,11 @@ class ProductRepository implements IProductRepository
         JOIN product_images pi 
             ON pi.product_id = p.product_id 
             AND pi.is_primary = 1
-    ";
+    ';
 
         $params = [];
 
-        if (!empty($child_slugs)) {
+        if (! empty($child_slugs)) {
             $placeholders = implode(',', array_fill(0, count($child_slugs), '?'));
             $query .= "
             JOIN product_categories pc ON pc.product_id = p.product_id
@@ -104,25 +105,25 @@ class ProductRepository implements IProductRepository
             $params = array_merge($params, $child_slugs);
         }
 
-        $query .= "
+        $query .= '
         WHERE p.product_id > ?
         AND (? IS NULL OR LOWER(p.product_name) LIKE ?)
         AND COALESCE(p.sale_price, p.base_price) BETWEEN ? AND ?
-    ";
+    ';
 
         $params[] = $last_id;
         $params[] = $keyword;
-        $params[] = $keyword ? '%' . strtolower($keyword) . '%' : null;
+        $params[] = $keyword ? '%'.strtolower($keyword).'%' : null;
         $params[] = $min_price ?? 0;
         $params[] = $max_price ?? 9999999999;
 
         if ($sort === 'asc' || $sort === 'desc') {
-            $query .= " ORDER BY COALESCE(p.sale_price, p.base_price) " . strtoupper($sort) . ", p.product_id DESC";
+            $query .= ' ORDER BY COALESCE(p.sale_price, p.base_price) '.strtoupper($sort).', p.product_id DESC';
         } else {
-            $query .= " ORDER BY p.product_id DESC";
+            $query .= ' ORDER BY p.product_id DESC';
         }
 
-        $query .= " LIMIT ?";
+        $query .= ' LIMIT ?';
         $params[] = $limit;
 
         return DB::select($query, $params);
@@ -135,6 +136,7 @@ class ProductRepository implements IProductRepository
             $product->sale_price += ($product->sale_price ?? 0) + ($product->additional_price ?? 0);
             $product->base_price += ($product->base_price ?? 0) + ($product->additional_price ?? 0);
         }
+
         return $products;
     }
 
@@ -177,35 +179,35 @@ class ProductRepository implements IProductRepository
     ";
 
         $params = [$slug, $last_id];
-        $where = ["p.product_id > ?"];
+        $where = ['p.product_id > ?'];
 
         // Keyword
         if ($keyword !== null && trim($keyword) !== '') {
-            $where[] = "LOWER(p.product_name) LIKE ?";
-            $params[] = '%' . strtolower(trim($keyword)) . '%';
+            $where[] = 'LOWER(p.product_name) LIKE ?';
+            $params[] = '%'.strtolower(trim($keyword)).'%';
         }
 
         // Processor filter
-        if (!empty($processor)) {
+        if (! empty($processor)) {
             $placeholders = implode(',', array_fill(0, count($processor), '?'));
             $where[] = "specs.processor IN ($placeholders)";
             $params = array_merge($params, $processor);
         }
 
         // Display filter
-        if (!empty($display)) {
+        if (! empty($display)) {
             $placeholders = implode(',', array_fill(0, count($display), '?'));
             $where[] = "specs.display IN ($placeholders)";
             $params = array_merge($params, $display);
         }
 
         // Price range
-        $where[] = "COALESCE(p.sale_price, p.base_price) BETWEEN ? AND ?";
+        $where[] = 'COALESCE(p.sale_price, p.base_price) BETWEEN ? AND ?';
         $params[] = $min_price ?? 0;
         $params[] = $max_price ?? 9999999999;
 
         // Join variants ONLY if needed
-        $needVariantJoin = !empty($ram) || !empty($storage) || !empty($color);
+        $needVariantJoin = ! empty($ram) || ! empty($storage) || ! empty($color);
 
         if ($needVariantJoin) {
             $query .= "
@@ -220,19 +222,19 @@ class ProductRepository implements IProductRepository
         ) AS v
         ";
 
-            if (!empty($ram)) {
+            if (! empty($ram)) {
                 $placeholders = implode(',', array_fill(0, count($ram), '?'));
                 $where[] = "v.ram IN ($placeholders)";
                 $params = array_merge($params, $ram);
             }
 
-            if (!empty($storage)) {
+            if (! empty($storage)) {
                 $placeholders = implode(',', array_fill(0, count($storage), '?'));
                 $where[] = "v.storage IN ($placeholders)";
                 $params = array_merge($params, $storage);
             }
 
-            if (!empty($color)) {
+            if (! empty($color)) {
                 $placeholders = implode(',', array_fill(0, count($color), '?'));
                 $where[] = "v.color IN ($placeholders)";
                 $params = array_merge($params, $color);
@@ -240,15 +242,16 @@ class ProductRepository implements IProductRepository
         }
 
         // Build final query
-        $query .= " WHERE " . implode(' AND ', $where);
+        $query .= ' WHERE '.implode(' AND ', $where);
 
         // Sort
         $direction = strtoupper($sort === 'asc' ? 'ASC' : 'DESC');
         $query .= " ORDER BY COALESCE(p.sale_price, p.base_price) $direction, p.product_id DESC";
 
         // Limit
-        $query .= " LIMIT ?";
+        $query .= ' LIMIT ?';
         $params[] = $limit;
+
         return DB::select($query, $params);
     }
 
@@ -293,40 +296,40 @@ class ProductRepository implements IProductRepository
     ";
 
         $params = [$slug, $last_id];
-        $where = ["p.product_id > ?"];
+        $where = ['p.product_id > ?'];
 
         // Keyword search
         if ($keyword !== null && trim($keyword) !== '') {
-            $where[] = "LOWER(p.product_name) LIKE ?";
-            $params[] = '%' . strtolower(trim($keyword)) . '%';
+            $where[] = 'LOWER(p.product_name) LIKE ?';
+            $params[] = '%'.strtolower(trim($keyword)).'%';
         }
 
         // Fixed spec filters (from specification JSON)
-        if (!empty($resolution)) {
+        if (! empty($resolution)) {
             $placeholders = implode(',', array_fill(0, count($resolution), '?'));
             $where[] = "specs.resolution IN ($placeholders)";
             $params = array_merge($params, $resolution);
         }
 
-        if (!empty($technology)) {
+        if (! empty($technology)) {
             $placeholders = implode(',', array_fill(0, count($technology), '?'));
             $where[] = "specs.technology IN ($placeholders)";
             $params = array_merge($params, $technology);
         }
 
-        if (!empty($processor)) {
+        if (! empty($processor)) {
             $placeholders = implode(',', array_fill(0, count($processor), '?'));
             $where[] = "specs.processor IN ($placeholders)";
             $params = array_merge($params, $processor);
         }
 
         // Price range
-        $where[] = "COALESCE(p.sale_price, p.base_price) BETWEEN ? AND ?";
+        $where[] = 'COALESCE(p.sale_price, p.base_price) BETWEEN ? AND ?';
         $params[] = $min_price ?? 0;
         $params[] = $max_price ?? 9999999999;
 
         // Only join variants if screenSize filter is applied
-        $needVariantJoin = !empty($screenSize);
+        $needVariantJoin = ! empty($screenSize);
 
         if ($needVariantJoin) {
             $query .= "
@@ -345,18 +348,19 @@ class ProductRepository implements IProductRepository
         }
 
         // Final WHERE clause
-        $query .= " WHERE " . implode(' AND ', $where);
+        $query .= ' WHERE '.implode(' AND ', $where);
 
         // Sorting: price first, then product_id as tie-breaker
         $direction = strtoupper($sort) === 'ASC' ? 'ASC' : 'DESC';
         $query .= " ORDER BY COALESCE(p.sale_price, p.base_price) $direction, p.product_id DESC";
 
         // Limit
-        $query .= " LIMIT ?";
+        $query .= ' LIMIT ?';
         $params[] = $limit;
 
         return DB::select($query, $params);
     }
+
     // 4. Computing & Displays
     public function searchComputing(
         ?string $slug = null,
@@ -400,34 +404,34 @@ class ProductRepository implements IProductRepository
     ";
 
         $params = [$slug, $last_id];
-        $where = ["p.product_id > ?"];
+        $where = ['p.product_id > ?'];
 
         // Keyword search
         if ($keyword !== null && trim($keyword) !== '') {
-            $where[] = "LOWER(p.product_name) LIKE ?";
-            $params[] = '%' . strtolower(trim($keyword)) . '%';
+            $where[] = 'LOWER(p.product_name) LIKE ?';
+            $params[] = '%'.strtolower(trim($keyword)).'%';
         }
 
         // Fixed spec filters
-        if (!empty($battery)) {
+        if (! empty($battery)) {
             $placeholders = implode(',', array_fill(0, count($battery), '?'));
             $where[] = "specs.battery IN ($placeholders)";
             $params = array_merge($params, $battery);
         }
 
-        if (!empty($graphics)) {  // CHANGED
+        if (! empty($graphics)) {  // CHANGED
             $placeholders = implode(',', array_fill(0, count($graphics), '?'));
             $where[] = "specs.graphics IN ($placeholders)";  // CHANGED
             $params = array_merge($params, $graphics);
         }
 
         // Price range
-        $where[] = "COALESCE(p.sale_price, p.base_price) BETWEEN ? AND ?";
+        $where[] = 'COALESCE(p.sale_price, p.base_price) BETWEEN ? AND ?';
         $params[] = $min_price ?? 0;
         $params[] = $max_price ?? 9999999999;
 
         // Only join variants if any variant filter is used
-        $needVariantJoin = !empty($ram) || !empty($storage) || !empty($processor) || !empty($color);
+        $needVariantJoin = ! empty($ram) || ! empty($storage) || ! empty($processor) || ! empty($color);
 
         if ($needVariantJoin) {
             $query .= "
@@ -443,25 +447,25 @@ class ProductRepository implements IProductRepository
             ) AS v
         ";
 
-            if (!empty($ram)) {
+            if (! empty($ram)) {
                 $placeholders = implode(',', array_fill(0, count($ram), '?'));
                 $where[] = "v.ram IN ($placeholders)";
                 $params = array_merge($params, $ram);
             }
 
-            if (!empty($storage)) {
+            if (! empty($storage)) {
                 $placeholders = implode(',', array_fill(0, count($storage), '?'));
                 $where[] = "v.storage IN ($placeholders)";
                 $params = array_merge($params, $storage);
             }
 
-            if (!empty($processor)) {
+            if (! empty($processor)) {
                 $placeholders = implode(',', array_fill(0, count($processor), '?'));
                 $where[] = "v.processor IN ($placeholders)";
                 $params = array_merge($params, $processor);
             }
 
-            if (!empty($color)) {
+            if (! empty($color)) {
                 $placeholders = implode(',', array_fill(0, count($color), '?'));
                 $where[] = "v.color IN ($placeholders)";
                 $params = array_merge($params, $color);
@@ -469,14 +473,14 @@ class ProductRepository implements IProductRepository
         }
 
         // Final WHERE clause
-        $query .= " WHERE " . implode(' AND ', $where);
+        $query .= ' WHERE '.implode(' AND ', $where);
 
         // Sorting
         $direction = strtoupper($sort) === 'ASC' ? 'ASC' : 'DESC';
         $query .= " ORDER BY COALESCE(p.sale_price, p.base_price) $direction, p.product_id DESC";
 
         // Limit
-        $query .= " LIMIT ?";
+        $query .= ' LIMIT ?';
         $params[] = $limit;
 
         return DB::select($query, $params);

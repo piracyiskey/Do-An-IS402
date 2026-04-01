@@ -1,10 +1,8 @@
 <?php
 
-
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
-
 
 return new class extends Migration
 {
@@ -23,11 +21,9 @@ return new class extends Migration
             $table->boolean('is_default')->default(false);
             $table->enum('address_type', ['home', 'office', 'other'])->nullable();
 
-
             $table->foreign('user_id')->references('user_id')->on('users')->onDelete('cascade');
         });
     }
-
 
     public function down(): void
     {

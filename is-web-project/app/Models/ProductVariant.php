@@ -7,7 +7,9 @@ use Illuminate\Database\Eloquent\Model;
 class ProductVariant extends Model
 {
     protected $table = 'product_variants';
+
     protected $primaryKey = 'variant_id';
+
     protected $fillable = [
         'product_id',
         'variant_name',
@@ -16,6 +18,7 @@ class ProductVariant extends Model
         'additional_price',
         'stock_quantity',
     ];
+
     protected $casts = [
         'attributes' => 'array', // JSON cast to array
     ];

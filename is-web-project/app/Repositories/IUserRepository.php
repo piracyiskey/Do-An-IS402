@@ -1,6 +1,5 @@
-<?php 
+<?php
+
 namespace App\Repositories;
-use App\Models; 
-interface IUserRepository
-{
-}
+
+interface IUserRepository {}

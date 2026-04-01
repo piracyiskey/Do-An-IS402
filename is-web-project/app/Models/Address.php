@@ -7,8 +7,11 @@ use Illuminate\Database\Eloquent\Model;
 class Address extends Model
 {
     protected $table = 'addresses';
+
     public $timestamps = false;
+
     protected $primaryKey = 'address_id';
+
     protected $fillable = [
         'user_id',
         'recipient_name',
@@ -21,6 +24,7 @@ class Address extends Model
         'is_default',
         'address_type',
     ];
+
     protected $casts = [
         'is_default' => 'boolean',
         'address_type' => 'string', // ENUM cast to string

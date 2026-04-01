@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import axios from "axios";
 import Navbar from "../components/Navbar";
@@ -28,7 +28,7 @@ const VerifiedEmail = () => {
       handleSendCode();
       setHasAutoSent(true); // ✅ Đánh dấu đã gửi rồi
     }
-  }, []); // ✅ Empty dependency để chỉ chạy 1 lần
+  }, [email, handleSendCode, hasAutoSent]);
 
   // Countdown cho resend
   useEffect(() => {
@@ -42,7 +42,7 @@ const VerifiedEmail = () => {
   }, [resendCooldown]);
 
   // Gửi mã xác thực qua email
-  const handleSendCode = async () => {
+  const handleSendCode = useCallback(async () => {
     if (!email || isResending || resendCooldown > 0) return;
 
     setIsResending(true);
@@ -63,7 +63,7 @@ const VerifiedEmail = () => {
     } finally {
       setIsResending(false);
     }
-  };
+  }, [email, isResending, resendCooldown]);
 
   // Xác thực mã code
   const handleVerifyCode = async (e) => {

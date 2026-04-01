@@ -161,7 +161,7 @@ export default function Footer() {
               <Youtube className="w-5 h-5" />
             </p>
           </div>
-        </div>  
+        </div>
       </div>
     </footer>
   );

@@ -183,7 +183,7 @@ const SignUp = () => {
     
     // Filter out empty errors
     const filteredErrors = Object.fromEntries(
-      Object.entries(newErrors).filter(([ _, value]) => value !== "")
+      Object.entries(newErrors).filter(([, value]) => value !== "")
     );
     
     setErrors(filteredErrors);

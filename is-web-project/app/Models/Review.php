@@ -7,7 +7,9 @@ use Illuminate\Database\Eloquent\Model;
 class Review extends Model
 {
     protected $table = 'reviews';
+
     protected $primaryKey = 'review_id';
+
     protected $fillable = [
         'product_id',
         'user_id',
@@ -17,10 +19,12 @@ class Review extends Model
         'is_verified_purchase',
         'is_approved',
     ];
+
     protected $casts = [
         'is_verified_purchase' => 'boolean',
         'is_approved' => 'boolean',
     ];
+
     public $timestamps = false;
 
     public function product()

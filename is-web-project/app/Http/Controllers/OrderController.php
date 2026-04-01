@@ -3,24 +3,26 @@
 namespace App\Http\Controllers;
 
 use App\Models\Address;
-use App\Models\Cart;
 use App\Models\Order;
-use App\Repositories\ICartRepository;
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
 use App\Models\OrderItem;
 use App\Models\Promotion;
+use App\Repositories\ICartRepository;
 use App\Repositories\PromotionRepository;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class OrderController extends Controller
 {
     protected $cartRepository;
+
     protected $promotionRepository;
+
     public function __construct(ICartRepository $cartRepository, PromotionRepository $promotionRepository)
     {
         $this->cartRepository = $cartRepository;
         $this->promotionRepository = $promotionRepository;
     }
+
     public function createOrder(Request $request)
     {
         $data = $request->validate([
@@ -89,7 +91,7 @@ class OrderController extends Controller
                 DB::table('order_promotions')->insert([
                     'order_id' => $order_info->order_id,
                     'promotion_id' => $promotion->promotion_id,
-                    'discount_applied' => $total_discount
+                    'discount_applied' => $total_discount,
                 ]);
             }
         }
@@ -97,54 +99,60 @@ class OrderController extends Controller
             'total_amount' => max(0, $order_total_price - $total_discount),
             'discount_amount' => $total_discount,
         ]);
+
         return response()->json([
             'message' => 'Order created successfully',
             'order_id' => $order_info->order_id,
             'total_amount' => max(0, $order_total_price - $total_discount),
-            'discount_amount' => $total_discount
+            'discount_amount' => $total_discount,
         ], 201);
     }
+
     public function getAllUserOrders(Request $request)
     {
         $orders = Order::where('user_id', $request->user()->getKey())->get();
+
         return response()->json([
             'orders' => $orders,
         ], 200);
     }
+
     public function getOrderDetails(Request $request)
     {
         $order_id = $request->route('order_id') ?? $request->input('order_id');
 
         if (empty($order_id)) {
             return response()->json([
-                'message' => 'order_id is required'
+                'message' => 'order_id is required',
             ], 422);
         }
 
         $order = Order::where('order_id', $order_id)->first();
-        if (!$order) {
+        if (! $order) {
             return response()->json([
                 'message' => 'Order not found',
             ], 404);
         }
         $orderItems = OrderItem::where('order_id', $order_id)->get();
+
         return response()->json([
             'order' => $order,
             'items' => $orderItems,
         ], 200);
     }
+
     public function cancelOrder(Request $request)
     {
         $order_id = $request->route('order_id') ?? $request->input('order_id');
 
         if (empty($order_id)) {
             return response()->json([
-                'message' => 'order_id is required'
+                'message' => 'order_id is required',
             ], 422);
         }
 
         $order = Order::where('order_id', $order_id)->first();
-        if (!$order) {
+        if (! $order) {
             return response()->json([
                 'message' => 'Order not found',
             ], 404);
@@ -154,7 +162,6 @@ class OrderController extends Controller
             OrderItem::where('order_id', $order_id)->delete();
             $order->delete();
         });
-
 
         return response()->json([
             'message' => 'Order canceled successfully',

@@ -1,11 +1,14 @@
 <?php
 
-use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
-use App\Http\Controllers\ProductController;
 use App\Http\Controllers\CategoryController;
-use App\Http\Controllers\AdminController;
 use App\Http\Controllers\GoogleController;
+use App\Http\Controllers\HealthController;
+use App\Http\Controllers\ProductController;
+use Illuminate\Support\Facades\Route;
+
+// Health check endpoint (public, no auth required)
+Route::get('/health', [HealthController::class, 'check']);
 
 Route::middleware('check.refresh.token')->group(function () {
     Route::post('/register', [AuthController::class, 'post_register']);
@@ -24,7 +27,7 @@ Route::middleware('auth:api')->prefix('auth')->group(function () {
     route::get('/admin/orders', [\App\Http\Controllers\AdminController::class, 'getAllOrders']);
     route::get('/admin/order/{order_id}', [\App\Http\Controllers\AdminController::class, 'getOrderDetails']);
     route::get('/verify-payment', [\App\Http\Controllers\AdminController::class, 'is_pay']);
-    
+
     // User routes
     route::get('/user', [\App\Http\Controllers\UserController::class, 'user']);
     route::get('/buyvip', [\App\Http\Controllers\UserController::class, 'buyVip']);

@@ -12,16 +12,18 @@ class ValidateRole
     {
         $user = $request->user();
 
-        if (!$user || !$user->hasAnyRole($roles)) {
+        if (! $user || ! $user->hasAnyRole($roles)) {
             $message = 'Need role: ';
             if (count($roles) > 0) {
-                $message = $message . $roles[0];
+                $message = $message.$roles[0];
             }
             for ($i = 1; $i < count($roles); $i++) {
             }
-            $message = $message . ' to authorize';
+            $message = $message.' to authorize';
+
             return response()->json(['error' => $message], 403);
         }
+
         return $next($request);
     }
 }

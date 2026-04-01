@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { Loader2, SearchX, ChevronDown, ChevronUp, Filter, ShoppingCart, CreditCard } from 'lucide-react';
+import { buildApiUrl, buildImageUrl } from '../lib/url';
 
 // IMPORT NAVBAR VÀ FOOTER CỦA BẠN TẠI ĐÂY
 import Navbar from "./Navbar"; 
@@ -25,7 +26,7 @@ const SearchResults = () => {
     const fetchResults = async () => {
       setLoading(true);
       try {
-        const response = await axios.get(`http://localhost:8000/api/products/search`, {
+        const response = await axios.get(buildApiUrl('/products/search'), {
           params: { keyword: keyword, category: selectedCategory !== "All" ? selectedCategory : null }
         });
         setProducts(response.data);
@@ -97,7 +98,7 @@ const SearchResults = () => {
                 {products.map((product) => (
                   <div key={product.product_id} className="group flex flex-col bg-white border border-gray-100 rounded-[24px] p-4 hover:shadow-2xl transition-all duration-500 cursor-pointer" onClick={() => navigate(`/product/${product.product_id}`)}>
                     <div className="aspect-square mb-4 bg-[#f7f7f7] rounded-[18px] p-6 flex items-center justify-center overflow-hidden">
-                      <img src={`http://localhost:8000${product.image_url}`} className="w-full h-full object-contain group-hover:scale-110 transition-transform duration-700" alt={product.product_name} onError={(e) => {e.target.src = 'https://via.placeholder.com/300?text=Samsung';}} />
+                      <img src={buildImageUrl(product.image_url)} className="w-full h-full object-contain group-hover:scale-110 transition-transform duration-700" alt={product.product_name} onError={(e) => {e.target.src = 'https://via.placeholder.com/300?text=Samsung';}} />
                     </div>
                     <div className="flex-1">
                       <h3 className="font-bold text-gray-900 text-[14px] leading-tight mb-2 line-clamp-2 uppercase italic">{product.product_name}</h3>

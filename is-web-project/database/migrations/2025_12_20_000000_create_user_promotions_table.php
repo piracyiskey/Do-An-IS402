@@ -14,7 +14,7 @@ return new class extends Migration
             $table->unsignedBigInteger('promotion_id');
             $table->boolean('is_used')->default(false);
             $table->timestamp('created_at')->useCurrent();
-            
+
             $table->foreign('user_id')->references('user_id')->on('users')->onDelete('cascade');
             $table->foreign('promotion_id')->references('promotion_id')->on('promotions')->onDelete('cascade');
         });

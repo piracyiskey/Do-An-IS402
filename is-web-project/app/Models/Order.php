@@ -7,7 +7,9 @@ use Illuminate\Database\Eloquent\Model;
 class Order extends Model
 {
     protected $table = 'orders';
+
     protected $primaryKey = 'order_id';
+
     protected $fillable = [
         'order_code',
         'user_id',
@@ -27,6 +29,7 @@ class Order extends Model
         'delivered_at',
         'cancelled_at',
     ];
+
     protected $casts = [
         'order_status' => 'string',
         'payment_status' => 'string',

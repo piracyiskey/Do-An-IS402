@@ -18,7 +18,7 @@ class VerifyCode extends Mailable
     /**
      * Create a new message instance.
      *
-     * @param string $code The verification code to send
+     * @param  string  $code  The verification code to send
      */
     public function __construct(string $code)
     {
@@ -42,7 +42,7 @@ class VerifyCode extends Mailable
     public function build()
     {
         // Use the html method to set raw HTML content
-        return $this->html('<h1>Verification Code: ' . $this->verificationCode . '</h1>');
+        return $this->html('<h1>Verification Code: '.$this->verificationCode.'</h1>');
     }
 
     /**

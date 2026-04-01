@@ -7,7 +7,9 @@ use Illuminate\Database\Eloquent\Model;
 class ProductImage extends Model
 {
     protected $table = 'product_images';
+
     protected $primaryKey = 'image_id';
+
     protected $fillable = [
         'product_id',
         'variant_id',
@@ -16,6 +18,7 @@ class ProductImage extends Model
         'display_order',
         'is_primary',
     ];
+
     protected $casts = [
         'is_primary' => 'boolean',
     ];

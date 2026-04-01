@@ -1,10 +1,7 @@
 <?php
 
-
 namespace App\Repositories;
 
-use App\Models;
-use App\Repositories\ICartRepository;
 use Illuminate\Support\Facades\DB;
 
 class CartRepository implements ICartRepository
@@ -20,10 +17,13 @@ class CartRepository implements ICartRepository
             left join product_images pi on p.product_id = pi.product_id and pi.is_primary = 1
             where c.user_id = :userId
         ', ['userId' => $userId]);
-        if (empty($cart) || count($cart) === 0)
+        if (empty($cart) || count($cart) === 0) {
             return null;
+        }
+
         return $cart;
     }
+
     public function calculateCartTotalPrice(array $cartItems)
     {
         $totalPrice = 0;
@@ -31,6 +31,7 @@ class CartRepository implements ICartRepository
             $item_additional = $item->additional_price ?? ($item->additionnal_price ?? 0);
             $totalPrice += ($item->sale_price + $item_additional) * $item->quantity;
         }
+
         return $totalPrice;
     }
 }

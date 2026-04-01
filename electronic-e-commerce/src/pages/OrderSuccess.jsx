@@ -47,6 +47,13 @@ const OrderSuccess = () => {
     <div className="flex flex-col min-h-screen w-screen bg-gray-50">
       <Navbar isTransparent={false} />
 
+      {isLoading ? (
+        <main className="flex-grow w-full mt-16 pb-20 flex items-center justify-center">
+          <div className="text-gray-600">Loading order details...</div>
+        </main>
+      ) : (
+        <>
+
       <main className="flex-grow w-full mt-16 pb-20">
         {/* Success Banner */}
         <div 
@@ -267,6 +274,8 @@ const OrderSuccess = () => {
       </main>
 
       <Footer />
+        </>
+      )}
     </div>
   );
 };

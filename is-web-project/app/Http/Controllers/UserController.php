@@ -2,8 +2,8 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
 use App\Models\Promotion;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
 class UserController extends Controller
@@ -12,7 +12,7 @@ class UserController extends Controller
     {
         $user = $request->user();
         $user->load('roles'); // Load roles relationship
-        
+
         return response()->json([
             'success' => true,
             'data' => $user,
@@ -22,7 +22,7 @@ class UserController extends Controller
     public function myPromotions(Request $request)
     {
         $user = $request->user();
-        
+
         $promotions = DB::table('user_promotions')
             ->join('promotions', 'user_promotions.promotion_id', '=', 'promotions.promotion_id')
             ->where('user_promotions.user_id', $user->user_id)
@@ -44,7 +44,7 @@ class UserController extends Controller
             'data' => $promotions,
         ]);
     }
-    
+
     public function redeemPoints(Request $request)
     {
         $validated = $request->validate([
@@ -55,14 +55,14 @@ class UserController extends Controller
         if ($user->reward_points < $validated['points']) {
             return response()->json([
                 'success' => false,
-                'message' => 'Insufficient reward points.'
+                'message' => 'Insufficient reward points.',
             ], 400);
         }
-        
+
         $user->reward_points -= $validated['points'];
-        
+
         $promotion = Promotion::create([
-            'promotion_code' => 'RD' . strtoupper(bin2hex(random_bytes(4))),
+            'promotion_code' => 'RD'.strtoupper(bin2hex(random_bytes(4))),
             'description' => 'Redeemed promotion',
             'discount_type' => 'fixed_amount',
             'discount_value' => $validated['points'] / 100,
@@ -90,6 +90,7 @@ class UserController extends Controller
             'discount_value' => $promotion->discount_value,
         ]);
     }
+
     public function buyVip(Request $request)
     {
         $user = $request->user();
@@ -98,7 +99,7 @@ class UserController extends Controller
         if ($user->reward_points < $vipCost * 100) {
             return response()->json([
                 'success' => false,
-                'message' => 'Insufficient reward points to buy VIP status.'
+                'message' => 'Insufficient reward points to buy VIP status.',
             ], 400);
         }
 
@@ -110,7 +111,7 @@ class UserController extends Controller
             'success' => true,
             'message' => 'VIP status purchased successfully.',
             'remaining_points' => $user->reward_points,
-            'vip_expiration' => $user->vip_expiration
+            'vip_expiration' => $user->vip_expiration,
         ]);
     }
 }

@@ -7,7 +7,9 @@ use Illuminate\Database\Eloquent\Model;
 class Brand extends Model
 {
     protected $table = 'brands';
+
     protected $primaryKey = 'brand_id';
+
     protected $fillable = [
         'brand_name',
         'slug',
@@ -15,6 +17,7 @@ class Brand extends Model
         'descriptions',
         'website_url',
     ];
+
     public $timestamps = false;
 
     public function products()

@@ -38,6 +38,12 @@
         }
     },
     "scripts": {
+        "lint": [
+            "@php vendor/bin/pint --test app bootstrap/app.php config database routes tests"
+        ],
+        "build": [
+            "@php artisan optimize"
+        ],
         "setup": [
             "composer install",
             "@php -r \"file_exists('.env') || copy('.env.example', '.env');\"",
@@ -45,6 +51,10 @@
             "@php artisan migrate --force",
             "npm install",
             "npm run build"
+        ],
+        "db:init": [
+            "@php artisan migrate --force",
+            "@php artisan db:seed --force"
         ],
         "dev": [
             "Composer\\Config::disableProcessTimeout",
