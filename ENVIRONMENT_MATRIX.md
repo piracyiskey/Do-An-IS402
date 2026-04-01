@@ -63,12 +63,7 @@ Store these in esapp-kv-dev.
 
 Already confirmed in Key Vault:
 
-- DB-HOST
-- DB-NAME
 - DB-PASSWORD
-- DB-USER
-- REDIS-HOST
-- REDIS-PORT
 - REDIS-PASSWORD
 
 ## 5) GitHub Environment Secrets (only when needed)

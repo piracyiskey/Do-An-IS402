@@ -31,38 +31,6 @@ resource "azurerm_key_vault_secret" "db_password" {
   key_vault_id = azurerm_key_vault.main.id
 }
 
-# Store database connection details
-resource "azurerm_key_vault_secret" "db_host" {
-  name         = "DB-HOST"
-  value        = azurerm_mysql_flexible_server.main.fqdn
-  key_vault_id = azurerm_key_vault.main.id
-}
-
-resource "azurerm_key_vault_secret" "db_user" {
-  name         = "DB-USER"
-  value        = var.mysql_admin_username
-  key_vault_id = azurerm_key_vault.main.id
-}
-
-resource "azurerm_key_vault_secret" "db_name" {
-  name         = "DB-NAME"
-  value        = azurerm_mysql_flexible_database.app.name
-  key_vault_id = azurerm_key_vault.main.id
-}
-
-# Store Redis connection details
-resource "azurerm_key_vault_secret" "redis_host" {
-  name         = "REDIS-HOST"
-  value        = azurerm_redis_cache.main.hostname
-  key_vault_id = azurerm_key_vault.main.id
-}
-
-resource "azurerm_key_vault_secret" "redis_port" {
-  name         = "REDIS-PORT"
-  value        = tostring(azurerm_redis_cache.main.ssl_port)
-  key_vault_id = azurerm_key_vault.main.id
-}
-
 resource "azurerm_key_vault_secret" "redis_password" {
   name         = "REDIS-PASSWORD"
   value        = azurerm_redis_cache.main.primary_access_key

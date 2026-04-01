@@ -13,6 +13,7 @@ terraform/terraform.tfstate
 terraform/terraform.tfstate.backup
 terraform.tfstate
 terraform.tfstate.backup
+tfplan
 
 # Ignore Laravel log file
 is-web-project/storage/logs/laravel.log

@@ -37,7 +37,7 @@ terraform init
 terraform validate
 
 # Preview changes
-terraform plan -out=tfplan
+terraform plan -lock=false -out=tfplan
 
 # Apply
 terraform apply tfplan
@@ -138,4 +138,4 @@ terraform destroy
 
 **Redis connection error**
 - Use TLS port (`6380`) with password auth
-- Check Key Vault secrets `REDIS-HOST`, `REDIS-PORT`, `REDIS-PASSWORD`
+- Check Key Vault secret `REDIS-PASSWORD` and runtime vars `REDIS_HOST` / `REDIS_PORT`
