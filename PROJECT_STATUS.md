@@ -114,6 +114,50 @@ Notes:
 
 ## Session Update Template (copy for Day 2+)
 
+## Day 2 - Kubernetes Runtime Manifests (Dev)
+
+Date: 2026-04-01
+
+### Goal
+- Prepare Kubernetes runtime manifests so AKS can run backend/frontend with clean config and secret injection.
+
+### Completed
+- Created dev manifest set in k8s/dev:
+  - namespace
+  - backend ConfigMap
+  - backend secret template
+  - backend nginx config ConfigMap
+  - backend Deployment + Service
+  - frontend Deployment + Service
+  - ingress
+  - migration Job template (suspended)
+- Added usage notes and apply order in k8s/dev/README.md.
+- Applied manifests to AKS successfully (`kubectl apply -f k8s/dev/`).
+- Verified resources exist in namespace `dev` (deployments, services, ingress, configmaps, secret, migration job).
+
+### Notes
+- Backend probe path is /api/health.
+- Migration is a separate pipeline concern via Job template, not app startup.
+- Current `kubectl` context is `esapp-aks-dev`.
+- Workloads are not ready yet because image tags are placeholders (`IMAGE_TAG`) and AKS has no pull auth to ACR (ImagePullBackOff / 401 Unauthorized).
+
+### Day 2 exit criteria
+- [x] `k8s/dev` manifests created for namespace, backend, frontend, ingress, and migration job
+- [x] Runtime config model defined (ConfigMap for non-secret, Secret for sensitive)
+- [x] Manifests applied to dev AKS namespace
+- [ ] Backend and frontend pods running successfully
+- [ ] Health probe passing on backend `/api/health`
+
+### Next
+1. Wire pipeline substitutions:
+   - IMAGE_TAG
+   - backend secret values from Key Vault
+2. Grant AKS pull access to ACR (or use imagePullSecret) before rollout.
+3. Build and push backend/frontend images with real tags.
+4. Update ingress hosts and URL env values after DNS/Ingress task.
+
+---
+
 ## Day X - <Title>
 
 Date: YYYY-MM-DD

@@ -1,0 +1,31 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: backend-nginx-config
+  namespace: dev
+data:
+  default.conf: |
+    server {
+        listen 80;
+        index index.php index.html;
+
+        root /var/www/public;
+
+        error_log  /var/log/nginx/error.log;
+        access_log /var/log/nginx/access.log;
+
+        location / {
+            try_files $uri $uri/ /index.php?$query_string;
+        }
+
+        location ~ \.php$ {
+            try_files $uri =404;
+            fastcgi_pass 127.0.0.1:9000;
+            fastcgi_index index.php;
+            include fastcgi_params;
+            fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;
+            fastcgi_param PATH_INFO $fastcgi_path_info;
+        }
+
+        client_max_body_size 100M;
+    }
