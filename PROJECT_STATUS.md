@@ -245,3 +245,4 @@ Date: 2026-04-02
   - `GOOGLE_CLIENT_ID`, `GOOGLE_REDIRECT_URI`, `MAIL_MAILER`, `MAIL_SCHEME`, `MAIL_HOST`, `MAIL_PORT`, `MAIL_FROM_ADDRESS`
 3. Trigger one `deploy-dev` workflow run to apply OAuth/mail config + rebuilt frontend.
 4. Start staging environment setup using the same pipeline and config contract.
+5.
