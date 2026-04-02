@@ -33,14 +33,15 @@ Add these in dev now.
 | MYSQL_USER | azureuser | Terraform output |
 | REDIS_HOST | esapp-redis-dev.redis.cache.windows.net | Terraform output |
 | REDIS_PORT | 6380 | Terraform output |
-| BACKEND_PUBLIC_URL | https://dev-api.<your-domain> | DNS/Ingress |
-| FRONTEND_PUBLIC_URL | https://dev.<your-domain> | DNS/Ingress |
-| CORS_ALLOWED_ORIGINS | https://dev.<your-domain> | DNS/Ingress |
+| BACKEND_PUBLIC_URL | http://dev-api.20.247.224.41.nip.io | DNS/Ingress (temporary) |
+| FRONTEND_PUBLIC_URL | http://dev.20.247.224.41.nip.io | DNS/Ingress (temporary) |
+| CORS_ALLOWED_ORIGINS | http://dev.20.247.224.41.nip.io | DNS/Ingress (temporary) |
 
 Notes:
 
 - Use one namespace per environment. For this plan, use dev and later staging.
 - Repository names are the ACR repository paths used by container pushes.
+- Temporary public hosts use `nip.io` mapped to the ingress public IP. Replace these with your real domain records later.
 
 ## 3) Laravel runtime decisions for dev
 

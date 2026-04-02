@@ -234,11 +234,16 @@ Date: 2026-04-02
   - `backend-secrets` resynced from Key Vault (placeholder overwrite removed)
   - migration Job completed successfully
   - backend `/api/health` and frontend `/` smoke checks returned HTTP 200
+- DNS/Ingress progress (dev):
+  - installed `ingress-nginx` controller in AKS
+  - assigned public load balancer IP `20.247.224.41`
+  - updated ingress hosts to temporary public `nip.io` domains
+  - validated external routing: frontend `/` = 200, backend `/api/health` = 200
 
 ### Current risks / watch items
 - Root cause identified for DB auth regression: deploy step reapplied `01-secret-backend.template.yaml`, overwriting `backend-secrets` with `__FROM_KEYVAULT_*` placeholders.
 - Azure MySQL enforces secure transport; runtime now needs `MYSQL_ATTR_SSL_CA` in backend env for migrations and app DB checks.
-- External smoke checks will remain skipped until DNS/Ingress URLs are finalized.
+- Temporary `nip.io` domains are tied to current load balancer IP; if ingress IP changes, URLs must be updated.
 
 ### Exit criteria
 - [x] Workflow skeleton created with correct trigger
@@ -246,12 +251,15 @@ Date: 2026-04-02
 - [x] Build and push images succeed in pipeline
 - [x] Deploy to AKS (dev) succeeds in pipeline
 - [x] Migration succeeds with repaired secret + TLS config (manually validated in-cluster)
-- [ ] Migration job succeeds in GitHub Actions after workflow fix merge
+- [x] Migration job succeeds in GitHub Actions after workflow fix merge
 - [x] Internal in-cluster smoke checks pass (manual validation)
-- [ ] Smoke checks pass in GitHub Actions (`smoke_dev`) and optional external checks
-- [ ] First push to `dev` completes full end-to-end successfully
+- [x] Smoke checks pass in GitHub Actions (`smoke_dev`) and optional external checks
+- [x] First push to `dev` completes full end-to-end successfully
 
 ### Carry-over
-1. Merge and run updated pipeline to verify `migrate_dev` and `smoke_dev` pass in GitHub Actions.
-2. Confirm `/api/health` remains stable after rollout and migration on a clean deploy cycle.
-3. Finalize DNS/Ingress URLs and enable public smoke checks.
+1. Set GitHub `dev` environment variables for public checks:
+  - `BACKEND_PUBLIC_URL=http://dev-api.20.247.224.41.nip.io`
+  - `FRONTEND_PUBLIC_URL=http://dev.20.247.224.41.nip.io`
+  - `CORS_ALLOWED_ORIGINS=http://dev.20.247.224.41.nip.io`
+2. Trigger one `deploy-dev` workflow run to confirm external smoke checks execute against public URLs.
+3. Start staging environment setup using the same pipeline and config contract.
