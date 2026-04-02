@@ -115,10 +115,18 @@ jobs:
       - name: Build and push frontend image
         env:
           FRONTEND_IMAGE: ${{ steps.meta.outputs.frontend_image }}
+          BACKEND_PUBLIC_URL: ${{ vars.BACKEND_PUBLIC_URL }}
         run: |
+          if [ -z "$BACKEND_PUBLIC_URL" ]; then
+            echo "BACKEND_PUBLIC_URL is not set in GitHub environment vars."
+            echo "Set it so frontend bundle can call the public backend URL."
+            exit 1
+          fi
+
           docker build \
             -f electronic-e-commerce/Dockerfile \
             --target production \
+            --build-arg VITE_BACKEND_API_URL="$BACKEND_PUBLIC_URL" \
             -t "$FRONTEND_IMAGE" \
             electronic-e-commerce
           docker push "$FRONTEND_IMAGE"
@@ -176,7 +184,6 @@ jobs:
             --dry-run=client -o yaml | kubectl apply -f -
 
       - name: Attach ACR to AKS for image pull (best effort)
-        continue-on-error: true
         env:
           ACR_LOGIN_SERVER: ${{ vars.ACR_LOGIN_SERVER }}
           AKS_RESOURCE_GROUP: ${{ vars.AKS_RESOURCE_GROUP }}
@@ -184,7 +191,10 @@ jobs:
         run: |
           ACR_NAME="${ACR_LOGIN_SERVER%%.*}"
           echo "Attempting to attach ACR to AKS. This may require Owner/User Access Administrator on subscription or AKS RG."
-          az aks update --resource-group "$AKS_RESOURCE_GROUP" --name "$AKS_CLUSTER_NAME" --attach-acr "$ACR_NAME"
+          if ! az aks update --resource-group "$AKS_RESOURCE_GROUP" --name "$AKS_CLUSTER_NAME" --attach-acr "$ACR_NAME" >/tmp/attach-acr.log 2>&1; then
+            echo "::warning::Could not attach ACR automatically. This is non-blocking if image pulls already work."
+            echo "Run once with Owner account if needed: az aks update --resource-group $AKS_RESOURCE_GROUP --name $AKS_CLUSTER_NAME --attach-acr $ACR_NAME"
+          fi
 
       - name: ACR attach note
         env:
@@ -203,6 +213,7 @@ jobs:
           MYSQL_USER: ${{ vars.MYSQL_USER }}
           REDIS_HOST: ${{ vars.REDIS_HOST }}
           REDIS_PORT: ${{ vars.REDIS_PORT }}
+          CORS_ALLOWED_ORIGINS: ${{ vars.CORS_ALLOWED_ORIGINS }}
         run: |
           rm -rf k8s/dev-rendered
           cp -R k8s/dev k8s/dev-rendered
@@ -215,6 +226,7 @@ jobs:
           sed -i "s|^  DB_USERNAME: .*|  DB_USERNAME: \"$MYSQL_USER\"|" k8s/dev-rendered/01-configmap-backend.yaml
           sed -i "s|^  REDIS_HOST: .*|  REDIS_HOST: \"$REDIS_HOST\"|" k8s/dev-rendered/01-configmap-backend.yaml
           sed -i "s|^  REDIS_PORT: .*|  REDIS_PORT: \"$REDIS_PORT\"|" k8s/dev-rendered/01-configmap-backend.yaml
+          sed -i "s|^  CORS_ALLOWED_ORIGINS: .*|  CORS_ALLOWED_ORIGINS: \"$CORS_ALLOWED_ORIGINS\"|" k8s/dev-rendered/01-configmap-backend.yaml
           echo "Runtime DB user set to: $MYSQL_USER"
 
       - name: Apply manifests

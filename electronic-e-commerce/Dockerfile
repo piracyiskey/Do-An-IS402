@@ -34,6 +34,10 @@ RUN npm ci
 # Copy application code
 COPY . .
 
+# Inject Vite environment at image build time for production bundle.
+ARG VITE_BACKEND_API_URL
+ENV VITE_BACKEND_API_URL=$VITE_BACKEND_API_URL
+
 # Build the application
 RUN npm run build
 
