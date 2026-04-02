@@ -29,7 +29,7 @@ data:
   REDIS_PORT: "6380"
 
   MAIL_MAILER: "smtp"
-  MAIL_SCHEME: "tls"
+  MAIL_SCHEME: "smtp"
   MAIL_HOST: "smtp.gmail.com"
   MAIL_PORT: "587"
   MAIL_FROM_ADDRESS: "no-reply@esapp.dev"

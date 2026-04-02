@@ -240,6 +240,10 @@ jobs:
           find k8s/dev-rendered -type f -name '*.yaml' -print0 | xargs -0 sed -i "s/IMAGE_TAG/$IMAGE_TAG/g"
           find k8s/dev-rendered -type f -name '*.yaml' -print0 | xargs -0 sed -i "s/namespace: dev/namespace: $AKS_NAMESPACE/g"
 
+          EFFECTIVE_MAIL_SCHEME="${MAIL_SCHEME:-smtp}"
+          if [ "$EFFECTIVE_MAIL_SCHEME" = "tls" ]; then EFFECTIVE_MAIL_SCHEME="smtp"; fi
+          if [ "$EFFECTIVE_MAIL_SCHEME" = "ssl" ]; then EFFECTIVE_MAIL_SCHEME="smtps"; fi
+
           # Inject runtime connection values into rendered backend ConfigMap.
           sed -i "s|^  DB_HOST: .*|  DB_HOST: \"$MYSQL_HOST\"|" k8s/dev-rendered/01-configmap-backend.yaml
           sed -i "s|^  DB_DATABASE: .*|  DB_DATABASE: \"$MYSQL_DATABASE\"|" k8s/dev-rendered/01-configmap-backend.yaml
@@ -251,7 +255,7 @@ jobs:
           sed -i "s|^  GOOGLE_CLIENT_ID: .*|  GOOGLE_CLIENT_ID: \"$GOOGLE_CLIENT_ID\"|" k8s/dev-rendered/01-configmap-backend.yaml
           sed -i "s|^  GOOGLE_REDIRECT_URI: .*|  GOOGLE_REDIRECT_URI: \"$GOOGLE_REDIRECT_URI\"|" k8s/dev-rendered/01-configmap-backend.yaml
           sed -i "s|^  MAIL_MAILER: .*|  MAIL_MAILER: \"${MAIL_MAILER:-smtp}\"|" k8s/dev-rendered/01-configmap-backend.yaml
-          sed -i "s|^  MAIL_SCHEME: .*|  MAIL_SCHEME: \"${MAIL_SCHEME:-tls}\"|" k8s/dev-rendered/01-configmap-backend.yaml
+          sed -i "s|^  MAIL_SCHEME: .*|  MAIL_SCHEME: \"$EFFECTIVE_MAIL_SCHEME\"|" k8s/dev-rendered/01-configmap-backend.yaml
           sed -i "s|^  MAIL_HOST: .*|  MAIL_HOST: \"${MAIL_HOST:-smtp.gmail.com}\"|" k8s/dev-rendered/01-configmap-backend.yaml
           sed -i "s|^  MAIL_PORT: .*|  MAIL_PORT: \"${MAIL_PORT:-587}\"|" k8s/dev-rendered/01-configmap-backend.yaml
           sed -i "s|^  MAIL_FROM_ADDRESS: .*|  MAIL_FROM_ADDRESS: \"${MAIL_FROM_ADDRESS:-no-reply@esapp.dev}\"|" k8s/dev-rendered/01-configmap-backend.yaml

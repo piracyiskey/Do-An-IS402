@@ -36,7 +36,7 @@ Add these in dev now.
 | GOOGLE_CLIENT_ID | 940152986387-hmnurcj182oerad7tik3d6pn26ib8ej9.apps.googleusercontent.com | Google OAuth app |
 | GOOGLE_REDIRECT_URI | http://dev.20.247.224.41.nip.io/auth/callback | Frontend URL |
 | MAIL_MAILER | smtp | Runtime decision |
-| MAIL_SCHEME | tls | Runtime decision |
+| MAIL_SCHEME | smtp | Runtime decision |
 | MAIL_HOST | smtp.gmail.com | Mail provider |
 | MAIL_PORT | 587 | Mail provider |
 | MAIL_FROM_ADDRESS | 22520283@gm.uit.edu.vn | Mail sender |
