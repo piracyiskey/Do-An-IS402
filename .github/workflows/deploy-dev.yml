@@ -352,23 +352,31 @@ jobs:
         env:
           AKS_NAMESPACE: ${{ vars.AKS_NAMESPACE }}
         run: |
+          kubectl delete pod curl-backend -n "$AKS_NAMESPACE" --ignore-not-found=true
           kubectl run curl-backend \
             --namespace "$AKS_NAMESPACE" \
             --image=curlimages/curl:8.7.1 \
             --restart=Never \
-            --rm -- \
-            curl -fsS http://backend/api/health
+            --command -- \
+            sh -c "curl -fsS http://backend/api/health"
+          kubectl wait --namespace "$AKS_NAMESPACE" --for=jsonpath='{.status.phase}'=Succeeded pod/curl-backend --timeout=120s
+          kubectl logs --namespace "$AKS_NAMESPACE" pod/curl-backend
+          kubectl delete pod curl-backend -n "$AKS_NAMESPACE" --ignore-not-found=true
 
       - name: Smoke check frontend service (in-cluster)
         env:
           AKS_NAMESPACE: ${{ vars.AKS_NAMESPACE }}
         run: |
+          kubectl delete pod curl-frontend -n "$AKS_NAMESPACE" --ignore-not-found=true
           kubectl run curl-frontend \
             --namespace "$AKS_NAMESPACE" \
             --image=curlimages/curl:8.7.1 \
             --restart=Never \
-            --rm -- \
-            curl -fsS -o /dev/null -w "%{http_code}\n" http://frontend/
+            --command -- \
+            sh -c "curl -fsS -o /dev/null -w '%{http_code}\n' http://frontend/"
+          kubectl wait --namespace "$AKS_NAMESPACE" --for=jsonpath='{.status.phase}'=Succeeded pod/curl-frontend --timeout=120s
+          kubectl logs --namespace "$AKS_NAMESPACE" pod/curl-frontend
+          kubectl delete pod curl-frontend -n "$AKS_NAMESPACE" --ignore-not-found=true
 
       - name: Optional external smoke checks
         env:
