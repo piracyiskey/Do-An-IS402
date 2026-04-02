@@ -25,6 +25,7 @@ data:
   QUEUE_CONNECTION: "database"
 
   REDIS_CLIENT: "phpredis"
+  REDIS_SCHEME: "tls"
   REDIS_HOST: "esapp-redis-dev.redis.cache.windows.net"
   REDIS_PORT: "6380"
 
