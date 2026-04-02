@@ -290,8 +290,18 @@ jobs:
 
           kubectl delete job backend-migrate -n "$AKS_NAMESPACE" --ignore-not-found=true
           kubectl apply -f k8s/dev/40-job-migrate.rendered.yaml
-          kubectl wait --for=condition=complete --timeout=300s job/backend-migrate -n "$AKS_NAMESPACE"
-          kubectl logs -n "$AKS_NAMESPACE" job/backend-migrate
+
+          if ! kubectl wait --for=condition=complete --timeout=300s job/backend-migrate -n "$AKS_NAMESPACE"; then
+            echo "Migration job did not complete. Capturing diagnostics..."
+            kubectl get job backend-migrate -n "$AKS_NAMESPACE" -o wide || true
+            kubectl describe job backend-migrate -n "$AKS_NAMESPACE" || true
+            kubectl get pods -n "$AKS_NAMESPACE" -l job-name=backend-migrate -o wide || true
+            kubectl describe pods -n "$AKS_NAMESPACE" -l job-name=backend-migrate || true
+            kubectl logs -n "$AKS_NAMESPACE" job/backend-migrate --all-containers=true --tail=300 || true
+            exit 1
+          fi
+
+          kubectl logs -n "$AKS_NAMESPACE" job/backend-migrate --all-containers=true --tail=300
 
       - name: Migration status
         run: |
