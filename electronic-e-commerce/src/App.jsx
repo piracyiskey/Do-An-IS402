@@ -10,7 +10,7 @@ const Home = lazy(() => import("./pages/Home.jsx"));
 const Login = lazy(() => import("./pages/Login.jsx"));
 const SignUp = lazy(() => import("./pages/SignUp.jsx"));
 const Cart = lazy(() => import("./pages/Cart.jsx"));
-const Career = lazy(() => import("./pages/Career"));
+const Career = lazy(() => import("./pages/career.jsx"));
 const AboutUs = lazy(() => import("./pages/About_Us"));
 const ContactUs = lazy(() => import("./pages/Contact_Us"));
 const DashBoard = lazy(() => import("./pages/Dash_Board"));
