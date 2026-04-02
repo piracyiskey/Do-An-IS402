@@ -123,12 +123,15 @@ jobs:
             exit 1
           fi
 
+          API_BASE_URL="${BACKEND_PUBLIC_URL%/}/api"
+
           docker build \
             -f electronic-e-commerce/Dockerfile \
             --target production \
-            --build-arg VITE_BACKEND_API_URL="$BACKEND_PUBLIC_URL" \
+            --build-arg VITE_BACKEND_API_URL="$API_BASE_URL" \
             -t "$FRONTEND_IMAGE" \
             electronic-e-commerce
+          echo "Frontend Vite API base URL: $API_BASE_URL"
           docker push "$FRONTEND_IMAGE"
 
   deploy_dev:
