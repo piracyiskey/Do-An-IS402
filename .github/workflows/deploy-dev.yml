@@ -222,12 +222,21 @@ jobs:
           kubectl apply -f k8s/dev-rendered/00-namespace.yaml
           kubectl apply -f k8s/dev-rendered/01-configmap-backend-nginx.yaml
           kubectl apply -f k8s/dev-rendered/01-configmap-backend.yaml
-          kubectl apply -f k8s/dev-rendered/01-secret-backend.template.yaml
           kubectl apply -f k8s/dev-rendered/10-deployment-backend.yaml
           kubectl apply -f k8s/dev-rendered/11-service-backend.yaml
           kubectl apply -f k8s/dev-rendered/20-deployment-frontend.yaml
           kubectl apply -f k8s/dev-rendered/21-service-frontend.yaml
           kubectl apply -f k8s/dev-rendered/30-ingress.yaml
+
+      - name: Validate backend secret values are not placeholders
+        env:
+          AKS_NAMESPACE: ${{ vars.AKS_NAMESPACE }}
+        run: |
+          DB_PASSWORD_VALUE=$(kubectl get secret backend-secrets -n "$AKS_NAMESPACE" -o jsonpath='{.data.DB_PASSWORD}' | base64 -d)
+          if [[ "$DB_PASSWORD_VALUE" == __FROM_KEYVAULT_* ]]; then
+            echo "backend-secrets contains placeholder values. Failing deploy to prevent invalid runtime config."
+            exit 1
+          fi
 
       - name: Wait for backend rollout
         env:

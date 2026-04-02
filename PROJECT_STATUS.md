@@ -218,19 +218,40 @@ Date: 2026-04-02
 - Implemented `smoke_dev` job:
   - in-cluster backend and frontend smoke checks
   - optional external URL checks when URL vars are available
+- Fixed frontend CI build failure on Linux runner:
+  - corrected case-sensitive import in frontend app (`Career` -> `career.jsx`)
+- Fixed Azure OIDC bootstrap:
+  - added federated credential for GitHub Environment subject `repo:piracyiskey/Do-An-IS402:environment:dev`
+  - granted required RBAC/policies for pipeline service principal (subscription read, ACR push, AKS access, Key Vault secret read)
+- Fixed deployment workflow issues discovered in first pipeline runs:
+  - made ACR attach step best-effort to avoid hard failure when owner-level permission is unavailable
+  - excluded migration Job from `deploy_dev` apply set (immutable Job template conflict)
+  - added richer rollout diagnostics (describe/logs on timeout)
+  - changed backend readiness/liveness probes to `/up` for rollout stability
+- Milestone reached:
+  - `Deploy to AKS (dev)` job now passes in GitHub Actions.
+- Recovery validation completed (manual in-cluster):
+  - `backend-secrets` resynced from Key Vault (placeholder overwrite removed)
+  - migration Job completed successfully
+  - backend `/api/health` and frontend `/` smoke checks returned HTTP 200
 
 ### Current risks / watch items
-- AKS must have pull rights to ACR (`az aks update --attach-acr ...`) before first successful rollout.
-- External smoke checks will be skipped until DNS/Ingress URLs are finalized.
-- Migration job assumes backend image contains `php artisan` runtime and correct env bindings.
+- Root cause identified for DB auth regression: deploy step reapplied `01-secret-backend.template.yaml`, overwriting `backend-secrets` with `__FROM_KEYVAULT_*` placeholders.
+- Azure MySQL enforces secure transport; runtime now needs `MYSQL_ATTR_SSL_CA` in backend env for migrations and app DB checks.
+- External smoke checks will remain skipped until DNS/Ingress URLs are finalized.
 
 ### Exit criteria
 - [x] Workflow skeleton created with correct trigger
 - [x] Job chain implemented for quality, build, deploy, migrate, smoke
-- [ ] First push to `dev` completes end-to-end successfully
-- [ ] Deployed app and smoke checks pass consistently
+- [x] Build and push images succeed in pipeline
+- [x] Deploy to AKS (dev) succeeds in pipeline
+- [x] Migration succeeds with repaired secret + TLS config (manually validated in-cluster)
+- [ ] Migration job succeeds in GitHub Actions after workflow fix merge
+- [x] Internal in-cluster smoke checks pass (manual validation)
+- [ ] Smoke checks pass in GitHub Actions (`smoke_dev`) and optional external checks
+- [ ] First push to `dev` completes full end-to-end successfully
 
 ### Carry-over
-1. Run first real pipeline on `dev` branch and collect logs.
-2. Fix any first-run issues (auth, image pull, rollout, migration, smoke).
+1. Merge and run updated pipeline to verify `migrate_dev` and `smoke_dev` pass in GitHub Actions.
+2. Confirm `/api/health` remains stable after rollout and migration on a clean deploy cycle.
 3. Finalize DNS/Ingress URLs and enable public smoke checks.
