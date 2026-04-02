@@ -158,34 +158,6 @@ Date: 2026-04-01
 
 ---
 
-## Day X - <Title>
-
-Date: YYYY-MM-DD
-
-### Goal
-- 
-
-### Completed
-- 
-
-### Decisions
-- 
-
-### Issues and fixes
-- Issue:
-- Fix:
-
-### Exit criteria
-- [ ] 
-- [ ] 
-
-### Carry-over
-1. 
-2. 
-3. 
-
----
-
 ## Day 3 - Dev GitHub Actions Pipeline
 
 Date: 2026-04-02
