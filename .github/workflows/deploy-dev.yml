@@ -219,12 +219,29 @@ jobs:
       - name: Wait for backend rollout
         env:
           AKS_NAMESPACE: ${{ vars.AKS_NAMESPACE }}
-        run: kubectl rollout status deployment/backend -n "$AKS_NAMESPACE" --timeout=300s
+        run: |
+          kubectl rollout status deployment/backend -n "$AKS_NAMESPACE" --timeout=420s || {
+            echo "Backend rollout timed out. Capturing diagnostics..."
+            kubectl get pods -n "$AKS_NAMESPACE" -l app=backend -o wide || true
+            kubectl describe deployment/backend -n "$AKS_NAMESPACE" || true
+            kubectl describe pods -n "$AKS_NAMESPACE" -l app=backend || true
+            kubectl logs -n "$AKS_NAMESPACE" deployment/backend -c nginx --tail=120 || true
+            kubectl logs -n "$AKS_NAMESPACE" deployment/backend -c php-fpm --tail=120 || true
+            exit 1
+          }
 
       - name: Wait for frontend rollout
         env:
           AKS_NAMESPACE: ${{ vars.AKS_NAMESPACE }}
-        run: kubectl rollout status deployment/frontend -n "$AKS_NAMESPACE" --timeout=300s
+        run: |
+          kubectl rollout status deployment/frontend -n "$AKS_NAMESPACE" --timeout=420s || {
+            echo "Frontend rollout timed out. Capturing diagnostics..."
+            kubectl get pods -n "$AKS_NAMESPACE" -l app=frontend -o wide || true
+            kubectl describe deployment/frontend -n "$AKS_NAMESPACE" || true
+            kubectl describe pods -n "$AKS_NAMESPACE" -l app=frontend || true
+            kubectl logs -n "$AKS_NAMESPACE" deployment/frontend --tail=120 || true
+            exit 1
+          }
 
       - name: Show running pods
         env:

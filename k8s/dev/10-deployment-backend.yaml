@@ -38,7 +38,7 @@ spec:
               subPath: default.conf
           readinessProbe:
             httpGet:
-              path: /api/health
+              path: /up
               port: http
             initialDelaySeconds: 10
             periodSeconds: 10
@@ -46,7 +46,7 @@ spec:
             failureThreshold: 6
           livenessProbe:
             httpGet:
-              path: /api/health
+              path: /up
               port: http
             initialDelaySeconds: 30
             periodSeconds: 15
