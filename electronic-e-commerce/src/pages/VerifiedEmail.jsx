@@ -22,25 +22,6 @@ const VerifiedEmail = () => {
   const [resendCooldown, setResendCooldown] = useState(0);
   const [hasAutoSent, setHasAutoSent] = useState(false); // ✅ Track xem đã auto gửi chưa
 
-  // ✅ Tự động gửi code KHI VỪA VÀO TRANG (chỉ 1 lần duy nhất)
-  useEffect(() => {
-    if (email && !hasAutoSent) {
-      handleSendCode();
-      setHasAutoSent(true); // ✅ Đánh dấu đã gửi rồi
-    }
-  }, [email, handleSendCode, hasAutoSent]);
-
-  // Countdown cho resend
-  useEffect(() => {
-    if (resendCooldown > 0) {
-      const timer = setTimeout(
-        () => setResendCooldown(resendCooldown - 1),
-        1000
-      );
-      return () => clearTimeout(timer);
-    }
-  }, [resendCooldown]);
-
   // Gửi mã xác thực qua email
   const handleSendCode = useCallback(async () => {
     if (!email || isResending || resendCooldown > 0) return;
@@ -64,6 +45,25 @@ const VerifiedEmail = () => {
       setIsResending(false);
     }
   }, [email, isResending, resendCooldown]);
+
+  // ✅ Tự động gửi code KHI VỪA VÀO TRANG (chỉ 1 lần duy nhất)
+  useEffect(() => {
+    if (email && !hasAutoSent) {
+      handleSendCode();
+      setHasAutoSent(true); // ✅ Đánh dấu đã gửi rồi
+    }
+  }, [email, handleSendCode, hasAutoSent]);
+
+  // Countdown cho resend
+  useEffect(() => {
+    if (resendCooldown > 0) {
+      const timer = setTimeout(
+        () => setResendCooldown(resendCooldown - 1),
+        1000
+      );
+      return () => clearTimeout(timer);
+    }
+  }, [resendCooldown]);
 
   // Xác thực mã code
   const handleVerifyCode = async (e) => {

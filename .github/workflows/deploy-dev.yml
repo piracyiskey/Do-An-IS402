@@ -116,10 +116,17 @@ jobs:
         env:
           FRONTEND_IMAGE: ${{ steps.meta.outputs.frontend_image }}
           BACKEND_PUBLIC_URL: ${{ vars.BACKEND_PUBLIC_URL }}
+          GOOGLE_CLIENT_ID: ${{ vars.GOOGLE_CLIENT_ID }}
+          GOOGLE_REDIRECT_URI: ${{ vars.GOOGLE_REDIRECT_URI }}
         run: |
           if [ -z "$BACKEND_PUBLIC_URL" ]; then
             echo "BACKEND_PUBLIC_URL is not set in GitHub environment vars."
             echo "Set it so frontend bundle can call the public backend URL."
+            exit 1
+          fi
+
+          if [ -z "$GOOGLE_CLIENT_ID" ] || [ -z "$GOOGLE_REDIRECT_URI" ]; then
+            echo "Missing required Google OAuth vars: GOOGLE_CLIENT_ID, GOOGLE_REDIRECT_URI"
             exit 1
           fi
 
@@ -129,6 +136,8 @@ jobs:
             -f electronic-e-commerce/Dockerfile \
             --target production \
             --build-arg VITE_BACKEND_API_URL="$API_BASE_URL" \
+            --build-arg VITE_GOOGLE_CLIENT_ID="$GOOGLE_CLIENT_ID" \
+            --build-arg VITE_GOOGLE_REDIRECT_URI="$GOOGLE_REDIRECT_URI" \
             -t "$FRONTEND_IMAGE" \
             electronic-e-commerce
           echo "Frontend Vite API base URL: $API_BASE_URL"
@@ -211,12 +220,20 @@ jobs:
         env:
           IMAGE_TAG: ${{ needs.build_push_images.outputs.image_tag }}
           AKS_NAMESPACE: ${{ vars.AKS_NAMESPACE }}
+          BACKEND_PUBLIC_URL: ${{ vars.BACKEND_PUBLIC_URL }}
           MYSQL_HOST: ${{ vars.MYSQL_HOST }}
           MYSQL_DATABASE: ${{ vars.MYSQL_DATABASE }}
           MYSQL_USER: ${{ vars.MYSQL_USER }}
           REDIS_HOST: ${{ vars.REDIS_HOST }}
           REDIS_PORT: ${{ vars.REDIS_PORT }}
           CORS_ALLOWED_ORIGINS: ${{ vars.CORS_ALLOWED_ORIGINS }}
+          GOOGLE_CLIENT_ID: ${{ vars.GOOGLE_CLIENT_ID }}
+          GOOGLE_REDIRECT_URI: ${{ vars.GOOGLE_REDIRECT_URI }}
+          MAIL_MAILER: ${{ vars.MAIL_MAILER }}
+          MAIL_SCHEME: ${{ vars.MAIL_SCHEME }}
+          MAIL_HOST: ${{ vars.MAIL_HOST }}
+          MAIL_PORT: ${{ vars.MAIL_PORT }}
+          MAIL_FROM_ADDRESS: ${{ vars.MAIL_FROM_ADDRESS }}
         run: |
           rm -rf k8s/dev-rendered
           cp -R k8s/dev k8s/dev-rendered
@@ -229,7 +246,15 @@ jobs:
           sed -i "s|^  DB_USERNAME: .*|  DB_USERNAME: \"$MYSQL_USER\"|" k8s/dev-rendered/01-configmap-backend.yaml
           sed -i "s|^  REDIS_HOST: .*|  REDIS_HOST: \"$REDIS_HOST\"|" k8s/dev-rendered/01-configmap-backend.yaml
           sed -i "s|^  REDIS_PORT: .*|  REDIS_PORT: \"$REDIS_PORT\"|" k8s/dev-rendered/01-configmap-backend.yaml
+          sed -i "s|^  APP_URL: .*|  APP_URL: \"$BACKEND_PUBLIC_URL\"|" k8s/dev-rendered/01-configmap-backend.yaml
           sed -i "s|^  CORS_ALLOWED_ORIGINS: .*|  CORS_ALLOWED_ORIGINS: \"$CORS_ALLOWED_ORIGINS\"|" k8s/dev-rendered/01-configmap-backend.yaml
+          sed -i "s|^  GOOGLE_CLIENT_ID: .*|  GOOGLE_CLIENT_ID: \"$GOOGLE_CLIENT_ID\"|" k8s/dev-rendered/01-configmap-backend.yaml
+          sed -i "s|^  GOOGLE_REDIRECT_URI: .*|  GOOGLE_REDIRECT_URI: \"$GOOGLE_REDIRECT_URI\"|" k8s/dev-rendered/01-configmap-backend.yaml
+          sed -i "s|^  MAIL_MAILER: .*|  MAIL_MAILER: \"${MAIL_MAILER:-smtp}\"|" k8s/dev-rendered/01-configmap-backend.yaml
+          sed -i "s|^  MAIL_SCHEME: .*|  MAIL_SCHEME: \"${MAIL_SCHEME:-tls}\"|" k8s/dev-rendered/01-configmap-backend.yaml
+          sed -i "s|^  MAIL_HOST: .*|  MAIL_HOST: \"${MAIL_HOST:-smtp.gmail.com}\"|" k8s/dev-rendered/01-configmap-backend.yaml
+          sed -i "s|^  MAIL_PORT: .*|  MAIL_PORT: \"${MAIL_PORT:-587}\"|" k8s/dev-rendered/01-configmap-backend.yaml
+          sed -i "s|^  MAIL_FROM_ADDRESS: .*|  MAIL_FROM_ADDRESS: \"${MAIL_FROM_ADDRESS:-no-reply@esapp.dev}\"|" k8s/dev-rendered/01-configmap-backend.yaml
           echo "Runtime DB user set to: $MYSQL_USER"
 
       - name: Apply manifests

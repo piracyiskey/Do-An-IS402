@@ -7,8 +7,8 @@ data:
   APP_NAME: "esapp"
   APP_ENV: "development"
   APP_DEBUG: "true"
-  APP_URL: "http://api.dev.local"
-  CORS_ALLOWED_ORIGINS: "http://frontend.dev.local"
+  APP_URL: "http://dev-api.20.247.224.41.nip.io"
+  CORS_ALLOWED_ORIGINS: "http://dev.20.247.224.41.nip.io"
 
   LOG_CHANNEL: "stack"
   LOG_LEVEL: "debug"
@@ -28,6 +28,12 @@ data:
   REDIS_HOST: "esapp-redis-dev.redis.cache.windows.net"
   REDIS_PORT: "6380"
 
+  MAIL_MAILER: "smtp"
+  MAIL_SCHEME: "tls"
+  MAIL_HOST: "smtp.gmail.com"
+  MAIL_PORT: "587"
+  MAIL_FROM_ADDRESS: "no-reply@esapp.dev"
+
   JWT_ALGO: "HS256"
-  GOOGLE_CLIENT_ID: "your-google-client-id.apps.googleusercontent.com"
-  GOOGLE_REDIRECT_URI: "http://frontend.dev.local/auth/callback"
+  GOOGLE_CLIENT_ID: "940152986387-hmnurcj182oerad7tik3d6pn26ib8ej9.apps.googleusercontent.com"
+  GOOGLE_REDIRECT_URI: "http://dev.20.247.224.41.nip.io/auth/callback"

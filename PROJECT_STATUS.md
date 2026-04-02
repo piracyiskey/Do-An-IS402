@@ -211,6 +211,14 @@ Date: 2026-04-02
   - assigned public load balancer IP `20.247.224.41`
   - updated ingress hosts to temporary public `nip.io` domains
   - validated external routing: frontend `/` = 200, backend `/api/health` = 200
+- Fixed frontend/backend public API mismatch:
+  - frontend build now injects `VITE_BACKEND_API_URL=${BACKEND_PUBLIC_URL}/api`
+- Fixed `/verified_email` blank screen:
+  - reordered `handleSendCode` declaration before `useEffect` dependencies in frontend component
+- Added runtime injection path for Google OAuth + SMTP config in deploy workflow.
+- Seeded dev database from snapshot:
+  - executed `DB_SEED_MODE=snapshot php artisan db:seed --force`
+  - verified populated counts (products, categories, users, orders)
 
 ### Current risks / watch items
 - Root cause identified for DB auth regression: deploy step reapplied `01-secret-backend.template.yaml`, overwriting `backend-secrets` with `__FROM_KEYVAULT_*` placeholders.
@@ -233,5 +241,7 @@ Date: 2026-04-02
   - `BACKEND_PUBLIC_URL=http://dev-api.20.247.224.41.nip.io`
   - `FRONTEND_PUBLIC_URL=http://dev.20.247.224.41.nip.io`
   - `CORS_ALLOWED_ORIGINS=http://dev.20.247.224.41.nip.io`
-2. Trigger one `deploy-dev` workflow run to confirm external smoke checks execute against public URLs.
-3. Start staging environment setup using the same pipeline and config contract.
+2. Add GitHub `dev` OAuth/mail variables:
+  - `GOOGLE_CLIENT_ID`, `GOOGLE_REDIRECT_URI`, `MAIL_MAILER`, `MAIL_SCHEME`, `MAIL_HOST`, `MAIL_PORT`, `MAIL_FROM_ADDRESS`
+3. Trigger one `deploy-dev` workflow run to apply OAuth/mail config + rebuilt frontend.
+4. Start staging environment setup using the same pipeline and config contract.

@@ -33,6 +33,13 @@ Add these in dev now.
 | MYSQL_USER | azureuser | Terraform output |
 | REDIS_HOST | esapp-redis-dev.redis.cache.windows.net | Terraform output |
 | REDIS_PORT | 6380 | Terraform output |
+| GOOGLE_CLIENT_ID | 940152986387-hmnurcj182oerad7tik3d6pn26ib8ej9.apps.googleusercontent.com | Google OAuth app |
+| GOOGLE_REDIRECT_URI | http://dev.20.247.224.41.nip.io/auth/callback | Frontend URL |
+| MAIL_MAILER | smtp | Runtime decision |
+| MAIL_SCHEME | tls | Runtime decision |
+| MAIL_HOST | smtp.gmail.com | Mail provider |
+| MAIL_PORT | 587 | Mail provider |
+| MAIL_FROM_ADDRESS | 22520283@gm.uit.edu.vn | Mail sender |
 | BACKEND_PUBLIC_URL | http://dev-api.20.247.224.41.nip.io | DNS/Ingress (temporary) |
 | FRONTEND_PUBLIC_URL | http://dev.20.247.224.41.nip.io | DNS/Ingress (temporary) |
 | CORS_ALLOWED_ORIGINS | http://dev.20.247.224.41.nip.io | DNS/Ingress (temporary) |
