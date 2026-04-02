@@ -205,7 +205,16 @@ jobs:
           find k8s/dev-rendered -type f -name '*.yaml' -print0 | xargs -0 sed -i "s/namespace: dev/namespace: $AKS_NAMESPACE/g"
 
       - name: Apply manifests
-        run: kubectl apply -f k8s/dev-rendered/
+        run: |
+          kubectl apply -f k8s/dev-rendered/00-namespace.yaml
+          kubectl apply -f k8s/dev-rendered/01-configmap-backend-nginx.yaml
+          kubectl apply -f k8s/dev-rendered/01-configmap-backend.yaml
+          kubectl apply -f k8s/dev-rendered/01-secret-backend.template.yaml
+          kubectl apply -f k8s/dev-rendered/10-deployment-backend.yaml
+          kubectl apply -f k8s/dev-rendered/11-service-backend.yaml
+          kubectl apply -f k8s/dev-rendered/20-deployment-frontend.yaml
+          kubectl apply -f k8s/dev-rendered/21-service-frontend.yaml
+          kubectl apply -f k8s/dev-rendered/30-ingress.yaml
 
       - name: Wait for backend rollout
         env:
