@@ -175,14 +175,24 @@ jobs:
             --from-literal=MAIL_PASSWORD="$MAIL_PASSWORD" \
             --dry-run=client -o yaml | kubectl apply -f -
 
-      - name: Attach ACR to AKS for image pull
+      - name: Attach ACR to AKS for image pull (best effort)
+        continue-on-error: true
         env:
           ACR_LOGIN_SERVER: ${{ vars.ACR_LOGIN_SERVER }}
           AKS_RESOURCE_GROUP: ${{ vars.AKS_RESOURCE_GROUP }}
           AKS_CLUSTER_NAME: ${{ vars.AKS_CLUSTER_NAME }}
         run: |
           ACR_NAME="${ACR_LOGIN_SERVER%%.*}"
+          echo "Attempting to attach ACR to AKS. This may require Owner/User Access Administrator on subscription or AKS RG."
           az aks update --resource-group "$AKS_RESOURCE_GROUP" --name "$AKS_CLUSTER_NAME" --attach-acr "$ACR_NAME"
+
+      - name: ACR attach note
+        env:
+          ACR_LOGIN_SERVER: ${{ vars.ACR_LOGIN_SERVER }}
+        run: |
+          ACR_NAME="${ACR_LOGIN_SERVER%%.*}"
+          echo "If the previous step failed with permission error, run this once with an Owner account:"
+          echo "az aks update --resource-group ${{ vars.AKS_RESOURCE_GROUP }} --name ${{ vars.AKS_CLUSTER_NAME }} --attach-acr $ACR_NAME"
 
       - name: Render manifests with image tag
         env:
