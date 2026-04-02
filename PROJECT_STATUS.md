@@ -183,3 +183,54 @@ Date: YYYY-MM-DD
 1. 
 2. 
 3. 
+
+---
+
+## Day 3 - Dev GitHub Actions Pipeline
+
+Date: 2026-04-02
+
+### Goal
+- Build a branch-triggered dev deployment workflow that runs quality gate, build/push, deploy, migration, and smoke checks.
+
+### Completed
+- Created `.github/workflows/deploy-dev.yml` with triggers:
+  - push on `dev`
+  - optional `workflow_dispatch`
+- Implemented `quality_gate` job:
+  - checkout
+  - Node 22 setup
+  - PHP 8.3 + Composer setup
+  - dependency installation
+  - `npm run predeploy:gate`
+- Implemented `build_push_images` job:
+  - Azure OIDC login
+  - ACR login
+  - backend/frontend Docker build and push
+  - commit SHA image tag outputs
+- Implemented `deploy_dev` job:
+  - AKS context setup
+  - Key Vault secret fetch and `backend-secrets` upsert
+  - manifest render with SHA tag and namespace replacement
+  - rollout wait for backend/frontend
+- Implemented `migrate_dev` job:
+  - controlled migration Job execution from template
+- Implemented `smoke_dev` job:
+  - in-cluster backend and frontend smoke checks
+  - optional external URL checks when URL vars are available
+
+### Current risks / watch items
+- AKS must have pull rights to ACR (`az aks update --attach-acr ...`) before first successful rollout.
+- External smoke checks will be skipped until DNS/Ingress URLs are finalized.
+- Migration job assumes backend image contains `php artisan` runtime and correct env bindings.
+
+### Exit criteria
+- [x] Workflow skeleton created with correct trigger
+- [x] Job chain implemented for quality, build, deploy, migrate, smoke
+- [ ] First push to `dev` completes end-to-end successfully
+- [ ] Deployed app and smoke checks pass consistently
+
+### Carry-over
+1. Run first real pipeline on `dev` branch and collect logs.
+2. Fix any first-run issues (auth, image pull, rollout, migration, smoke).
+3. Finalize DNS/Ingress URLs and enable public smoke checks.

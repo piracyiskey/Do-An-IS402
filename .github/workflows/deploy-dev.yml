@@ -1,0 +1,321 @@
+name: Deploy Dev
+
+on:
+  push:
+    branches:
+      - dev
+  workflow_dispatch:
+
+permissions:
+  id-token: write
+  contents: read
+
+concurrency:
+  group: deploy-dev
+  cancel-in-progress: true
+
+jobs:
+  quality_gate:
+    name: Quality Gate
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: "npm"
+          cache-dependency-path: electronic-e-commerce/package-lock.json
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: "8.3"
+          extensions: mbstring, bcmath, pdo_mysql
+          tools: composer:v2
+          coverage: none
+
+      - name: Install root tooling dependencies
+        run: npm install
+
+      - name: Install frontend dependencies
+        run: npm ci --prefix electronic-e-commerce
+
+      - name: Install backend dependencies
+        run: composer install --working-dir=is-web-project --no-interaction --prefer-dist
+
+      - name: Run predeploy gate
+        run: npm run predeploy:gate
+
+  build_push_images:
+    name: Build and Push Images
+    runs-on: ubuntu-latest
+    needs: quality_gate
+    environment: dev
+    outputs:
+      image_tag: ${{ steps.meta.outputs.image_tag }}
+      backend_image: ${{ steps.meta.outputs.backend_image }}
+      frontend_image: ${{ steps.meta.outputs.frontend_image }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Prepare image metadata
+        id: meta
+        env:
+          ACR_LOGIN_SERVER: ${{ vars.ACR_LOGIN_SERVER }}
+          ACR_BACKEND_REPOSITORY: ${{ vars.ACR_BACKEND_REPOSITORY }}
+          ACR_FRONTEND_REPOSITORY: ${{ vars.ACR_FRONTEND_REPOSITORY }}
+        run: |
+          IMAGE_TAG="${GITHUB_SHA}"
+
+          if [ -z "$ACR_LOGIN_SERVER" ] || [ -z "$ACR_BACKEND_REPOSITORY" ] || [ -z "$ACR_FRONTEND_REPOSITORY" ]; then
+            echo "Missing required dev environment vars: ACR_LOGIN_SERVER, ACR_BACKEND_REPOSITORY, ACR_FRONTEND_REPOSITORY"
+            exit 1
+          fi
+
+          BACKEND_IMAGE="$ACR_LOGIN_SERVER/$ACR_BACKEND_REPOSITORY:$IMAGE_TAG"
+          FRONTEND_IMAGE="$ACR_LOGIN_SERVER/$ACR_FRONTEND_REPOSITORY:$IMAGE_TAG"
+
+          echo "image_tag=$IMAGE_TAG" >> "$GITHUB_OUTPUT"
+          echo "backend_image=$BACKEND_IMAGE" >> "$GITHUB_OUTPUT"
+          echo "frontend_image=$FRONTEND_IMAGE" >> "$GITHUB_OUTPUT"
+
+      - name: Azure login (OIDC)
+        uses: azure/login@v2
+        with:
+          client-id: ${{ vars.AZURE_CLIENT_ID }}
+          tenant-id: ${{ vars.AZURE_TENANT_ID }}
+          subscription-id: ${{ vars.AZURE_SUBSCRIPTION_ID }}
+
+      - name: Setup Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Login to ACR
+        env:
+          ACR_LOGIN_SERVER: ${{ vars.ACR_LOGIN_SERVER }}
+        run: |
+          ACR_NAME="${ACR_LOGIN_SERVER%%.*}"
+          az acr login --name "$ACR_NAME"
+
+      - name: Build and push backend image
+        env:
+          BACKEND_IMAGE: ${{ steps.meta.outputs.backend_image }}
+        run: |
+          docker build \
+            -f is-web-project/docker/php/Dockerfile \
+            -t "$BACKEND_IMAGE" \
+            is-web-project
+          docker push "$BACKEND_IMAGE"
+
+      - name: Build and push frontend image
+        env:
+          FRONTEND_IMAGE: ${{ steps.meta.outputs.frontend_image }}
+        run: |
+          docker build \
+            -f electronic-e-commerce/Dockerfile \
+            --target production \
+            -t "$FRONTEND_IMAGE" \
+            electronic-e-commerce
+          docker push "$FRONTEND_IMAGE"
+
+  deploy_dev:
+    name: Deploy to AKS (dev)
+    runs-on: ubuntu-latest
+    needs: build_push_images
+    environment: dev
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Azure login (OIDC)
+        uses: azure/login@v2
+        with:
+          client-id: ${{ vars.AZURE_CLIENT_ID }}
+          tenant-id: ${{ vars.AZURE_TENANT_ID }}
+          subscription-id: ${{ vars.AZURE_SUBSCRIPTION_ID }}
+
+      - name: Set AKS context
+        uses: azure/aks-set-context@v4
+        with:
+          resource-group: ${{ vars.AKS_RESOURCE_GROUP }}
+          cluster-name: ${{ vars.AKS_CLUSTER_NAME }}
+
+      - name: Ensure namespace exists
+        env:
+          AKS_NAMESPACE: ${{ vars.AKS_NAMESPACE }}
+        run: |
+          kubectl create namespace "$AKS_NAMESPACE" --dry-run=client -o yaml | kubectl apply -f -
+
+      - name: Sync backend secret from Key Vault
+        env:
+          AKS_NAMESPACE: ${{ vars.AKS_NAMESPACE }}
+          KEYVAULT_NAME: ${{ vars.KEYVAULT_NAME }}
+        run: |
+          APP_KEY="$(az keyvault secret show --vault-name "$KEYVAULT_NAME" --name APP-KEY --query value -o tsv)"
+          DB_PASSWORD="$(az keyvault secret show --vault-name "$KEYVAULT_NAME" --name DB-PASSWORD --query value -o tsv)"
+          JWT_SECRET="$(az keyvault secret show --vault-name "$KEYVAULT_NAME" --name JWT-SECRET --query value -o tsv)"
+          GOOGLE_CLIENT_SECRET="$(az keyvault secret show --vault-name "$KEYVAULT_NAME" --name GOOGLE-CLIENT-SECRET --query value -o tsv)"
+          REDIS_PASSWORD="$(az keyvault secret show --vault-name "$KEYVAULT_NAME" --name REDIS-PASSWORD --query value -o tsv)"
+          MAIL_USERNAME="$(az keyvault secret show --vault-name "$KEYVAULT_NAME" --name MAIL-USERNAME --query value -o tsv)"
+          MAIL_PASSWORD="$(az keyvault secret show --vault-name "$KEYVAULT_NAME" --name MAIL-PASSWORD --query value -o tsv)"
+
+          kubectl create secret generic backend-secrets \
+            --namespace "$AKS_NAMESPACE" \
+            --from-literal=APP_KEY="$APP_KEY" \
+            --from-literal=DB_PASSWORD="$DB_PASSWORD" \
+            --from-literal=JWT_SECRET="$JWT_SECRET" \
+            --from-literal=GOOGLE_CLIENT_SECRET="$GOOGLE_CLIENT_SECRET" \
+            --from-literal=REDIS_PASSWORD="$REDIS_PASSWORD" \
+            --from-literal=MAIL_USERNAME="$MAIL_USERNAME" \
+            --from-literal=MAIL_PASSWORD="$MAIL_PASSWORD" \
+            --dry-run=client -o yaml | kubectl apply -f -
+
+      - name: Attach ACR to AKS for image pull
+        env:
+          ACR_LOGIN_SERVER: ${{ vars.ACR_LOGIN_SERVER }}
+          AKS_RESOURCE_GROUP: ${{ vars.AKS_RESOURCE_GROUP }}
+          AKS_CLUSTER_NAME: ${{ vars.AKS_CLUSTER_NAME }}
+        run: |
+          ACR_NAME="${ACR_LOGIN_SERVER%%.*}"
+          az aks update --resource-group "$AKS_RESOURCE_GROUP" --name "$AKS_CLUSTER_NAME" --attach-acr "$ACR_NAME"
+
+      - name: Render manifests with image tag
+        env:
+          IMAGE_TAG: ${{ needs.build_push_images.outputs.image_tag }}
+          AKS_NAMESPACE: ${{ vars.AKS_NAMESPACE }}
+        run: |
+          rm -rf k8s/dev-rendered
+          cp -R k8s/dev k8s/dev-rendered
+          find k8s/dev-rendered -type f -name '*.yaml' -print0 | xargs -0 sed -i "s/IMAGE_TAG/$IMAGE_TAG/g"
+          find k8s/dev-rendered -type f -name '*.yaml' -print0 | xargs -0 sed -i "s/namespace: dev/namespace: $AKS_NAMESPACE/g"
+
+      - name: Apply manifests
+        run: kubectl apply -f k8s/dev-rendered/
+
+      - name: Wait for backend rollout
+        env:
+          AKS_NAMESPACE: ${{ vars.AKS_NAMESPACE }}
+        run: kubectl rollout status deployment/backend -n "$AKS_NAMESPACE" --timeout=300s
+
+      - name: Wait for frontend rollout
+        env:
+          AKS_NAMESPACE: ${{ vars.AKS_NAMESPACE }}
+        run: kubectl rollout status deployment/frontend -n "$AKS_NAMESPACE" --timeout=300s
+
+      - name: Show running pods
+        env:
+          AKS_NAMESPACE: ${{ vars.AKS_NAMESPACE }}
+        run: kubectl get pods -n "$AKS_NAMESPACE"
+
+      - name: Deployment summary
+        run: |
+          echo "Planned image tag: ${{ needs.build_push_images.outputs.image_tag }}"
+          echo "Backend image: ${{ needs.build_push_images.outputs.backend_image }}"
+          echo "Frontend image: ${{ needs.build_push_images.outputs.frontend_image }}"
+
+  migrate_dev:
+    name: Run Migrations (dev)
+    runs-on: ubuntu-latest
+    needs:
+      - deploy_dev
+      - build_push_images
+    environment: dev
+    steps:
+      - name: Azure login (OIDC)
+        uses: azure/login@v2
+        with:
+          client-id: ${{ vars.AZURE_CLIENT_ID }}
+          tenant-id: ${{ vars.AZURE_TENANT_ID }}
+          subscription-id: ${{ vars.AZURE_SUBSCRIPTION_ID }}
+
+      - name: Set AKS context
+        uses: azure/aks-set-context@v4
+        with:
+          resource-group: ${{ vars.AKS_RESOURCE_GROUP }}
+          cluster-name: ${{ vars.AKS_CLUSTER_NAME }}
+
+      - name: Run migration job
+        env:
+          AKS_NAMESPACE: ${{ vars.AKS_NAMESPACE }}
+          IMAGE_TAG: ${{ needs.build_push_images.outputs.image_tag }}
+        run: |
+          cp k8s/dev/40-job-migrate.yaml k8s/dev/40-job-migrate.rendered.yaml
+          sed -i "s/IMAGE_TAG/$IMAGE_TAG/g" k8s/dev/40-job-migrate.rendered.yaml
+          sed -i "s/suspend: true/suspend: false/g" k8s/dev/40-job-migrate.rendered.yaml
+          sed -i "s/namespace: dev/namespace: $AKS_NAMESPACE/g" k8s/dev/40-job-migrate.rendered.yaml
+
+          kubectl delete job backend-migrate -n "$AKS_NAMESPACE" --ignore-not-found=true
+          kubectl apply -f k8s/dev/40-job-migrate.rendered.yaml
+          kubectl wait --for=condition=complete --timeout=300s job/backend-migrate -n "$AKS_NAMESPACE"
+          kubectl logs -n "$AKS_NAMESPACE" job/backend-migrate
+
+      - name: Migration status
+        run: |
+          echo "Migration completed in controlled job context."
+
+  smoke_dev:
+    name: Smoke Checks (dev)
+    runs-on: ubuntu-latest
+    needs: migrate_dev
+    environment: dev
+    steps:
+      - name: Azure login (OIDC)
+        uses: azure/login@v2
+        with:
+          client-id: ${{ vars.AZURE_CLIENT_ID }}
+          tenant-id: ${{ vars.AZURE_TENANT_ID }}
+          subscription-id: ${{ vars.AZURE_SUBSCRIPTION_ID }}
+
+      - name: Set AKS context
+        uses: azure/aks-set-context@v4
+        with:
+          resource-group: ${{ vars.AKS_RESOURCE_GROUP }}
+          cluster-name: ${{ vars.AKS_CLUSTER_NAME }}
+
+      - name: Smoke check backend health (in-cluster)
+        env:
+          AKS_NAMESPACE: ${{ vars.AKS_NAMESPACE }}
+        run: |
+          kubectl run curl-backend \
+            --namespace "$AKS_NAMESPACE" \
+            --image=curlimages/curl:8.7.1 \
+            --restart=Never \
+            --rm -- \
+            curl -fsS http://backend/api/health
+
+      - name: Smoke check frontend service (in-cluster)
+        env:
+          AKS_NAMESPACE: ${{ vars.AKS_NAMESPACE }}
+        run: |
+          kubectl run curl-frontend \
+            --namespace "$AKS_NAMESPACE" \
+            --image=curlimages/curl:8.7.1 \
+            --restart=Never \
+            --rm -- \
+            curl -fsS -o /dev/null -w "%{http_code}\n" http://frontend/
+
+      - name: Optional external smoke checks
+        env:
+          BACKEND_PUBLIC_URL: ${{ vars.BACKEND_PUBLIC_URL }}
+          FRONTEND_PUBLIC_URL: ${{ vars.FRONTEND_PUBLIC_URL }}
+        run: |
+          if [ -n "$BACKEND_PUBLIC_URL" ]; then
+            curl -fsS "$BACKEND_PUBLIC_URL/api/health"
+          else
+            echo "BACKEND_PUBLIC_URL not set - skipping external backend smoke check"
+          fi
+
+          if [ -n "$FRONTEND_PUBLIC_URL" ]; then
+            curl -fsS -o /dev/null -w "%{http_code}\n" "$FRONTEND_PUBLIC_URL"
+          else
+            echo "FRONTEND_PUBLIC_URL not set - skipping external frontend smoke check"
+          fi
+
+      - name: Smoke summary
+        run: |
+          echo "Dev smoke checks passed."
