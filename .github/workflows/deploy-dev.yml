@@ -262,6 +262,9 @@ jobs:
       - build_push_images
     environment: dev
     steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
       - name: Azure login (OIDC)
         uses: azure/login@v2
         with:
