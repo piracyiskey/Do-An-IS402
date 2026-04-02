@@ -209,21 +209,13 @@ jobs:
           find k8s/dev-rendered -type f -name '*.yaml' -print0 | xargs -0 sed -i "s/IMAGE_TAG/$IMAGE_TAG/g"
           find k8s/dev-rendered -type f -name '*.yaml' -print0 | xargs -0 sed -i "s/namespace: dev/namespace: $AKS_NAMESPACE/g"
 
-          # Normalize Azure MySQL admin username format (user@server) if needed.
-          MYSQL_SERVER_NAME="${MYSQL_HOST%%.*}"
-          DB_USERNAME_RUNTIME="$MYSQL_USER"
-          if [ -n "$MYSQL_SERVER_NAME" ] && [ "$MYSQL_USER" = "${MYSQL_USER%@*}" ]; then
-            DB_USERNAME_RUNTIME="${MYSQL_USER}@${MYSQL_SERVER_NAME}"
-          fi
-
           # Inject runtime connection values into rendered backend ConfigMap.
           sed -i "s|^  DB_HOST: .*|  DB_HOST: \"$MYSQL_HOST\"|" k8s/dev-rendered/01-configmap-backend.yaml
           sed -i "s|^  DB_DATABASE: .*|  DB_DATABASE: \"$MYSQL_DATABASE\"|" k8s/dev-rendered/01-configmap-backend.yaml
-          sed -i "s|^  DB_USERNAME: .*|  DB_USERNAME: \"$DB_USERNAME_RUNTIME\"|" k8s/dev-rendered/01-configmap-backend.yaml
+          sed -i "s|^  DB_USERNAME: .*|  DB_USERNAME: \"$MYSQL_USER\"|" k8s/dev-rendered/01-configmap-backend.yaml
           sed -i "s|^  REDIS_HOST: .*|  REDIS_HOST: \"$REDIS_HOST\"|" k8s/dev-rendered/01-configmap-backend.yaml
           sed -i "s|^  REDIS_PORT: .*|  REDIS_PORT: \"$REDIS_PORT\"|" k8s/dev-rendered/01-configmap-backend.yaml
-
-          echo "Runtime DB user set to: $DB_USERNAME_RUNTIME"
+          echo "Runtime DB user set to: $MYSQL_USER"
 
       - name: Apply manifests
         run: |
