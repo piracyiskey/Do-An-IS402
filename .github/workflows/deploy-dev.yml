@@ -5,6 +5,12 @@ on:
     branches:
       - dev
   workflow_dispatch:
+    inputs:
+      seed_snapshot:
+        description: "Run snapshot DB seed (DB_SEED_MODE=snapshot) after migrations"
+        required: false
+        type: boolean
+        default: false
 
 permissions:
   id-token: write
@@ -374,6 +380,54 @@ jobs:
       - name: Migration status
         run: |
           echo "Migration completed in controlled job context."
+
+      - name: Run optional snapshot seed
+        if: ${{ github.event_name == 'workflow_dispatch' && inputs.seed_snapshot == true }}
+        env:
+          AKS_NAMESPACE: ${{ vars.AKS_NAMESPACE }}
+          BACKEND_IMAGE: ${{ needs.build_push_images.outputs.backend_image }}
+        run: |
+          cat > k8s/dev/41-job-seed-snapshot.rendered.yaml <<EOF
+          apiVersion: batch/v1
+          kind: Job
+          metadata:
+            name: backend-seed-snapshot
+            namespace: ${AKS_NAMESPACE}
+          spec:
+            ttlSecondsAfterFinished: 600
+            backoffLimit: 1
+            template:
+              spec:
+                restartPolicy: Never
+                containers:
+                  - name: seed
+                    image: ${BACKEND_IMAGE}
+                    imagePullPolicy: IfNotPresent
+                    env:
+                      - name: DB_SEED_MODE
+                        value: snapshot
+                    envFrom:
+                      - configMapRef:
+                          name: backend-config
+                      - secretRef:
+                          name: backend-secrets
+                    command: ["php", "artisan", "db:seed", "--force"]
+          EOF
+
+          kubectl delete job backend-seed-snapshot -n "$AKS_NAMESPACE" --ignore-not-found=true
+          kubectl apply -f k8s/dev/41-job-seed-snapshot.rendered.yaml
+
+          if ! kubectl wait --for=condition=complete --timeout=420s job/backend-seed-snapshot -n "$AKS_NAMESPACE"; then
+            echo "Snapshot seed job did not complete. Capturing diagnostics..."
+            kubectl get job backend-seed-snapshot -n "$AKS_NAMESPACE" -o wide || true
+            kubectl describe job backend-seed-snapshot -n "$AKS_NAMESPACE" || true
+            kubectl get pods -n "$AKS_NAMESPACE" -l job-name=backend-seed-snapshot -o wide || true
+            kubectl describe pods -n "$AKS_NAMESPACE" -l job-name=backend-seed-snapshot || true
+            kubectl logs -n "$AKS_NAMESPACE" job/backend-seed-snapshot --all-containers=true --tail=300 || true
+            exit 1
+          fi
+
+          kubectl logs -n "$AKS_NAMESPACE" job/backend-seed-snapshot --all-containers=true --tail=300
 
   smoke_dev:
     name: Smoke Checks (dev)
