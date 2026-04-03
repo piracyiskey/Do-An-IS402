@@ -200,7 +200,7 @@ const ShopPage = () => {
                                         />
                                     </div>
                                     
-                                    <h3 className="font-bold text-gray-900 text-lg mb-2 line-clamp-1 group-hover:text-blue-600 transition-colors">
+                                    <h3 className="font-bold text-gray-900 text-lg mb-2 line-clamp-1 group-hover:text-orange-600 transition-colors">
                                         {product.product_name}
                                     </h3>
 
