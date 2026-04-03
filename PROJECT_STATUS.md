@@ -219,11 +219,23 @@ Date: 2026-04-02
 - Seeded dev database from snapshot:
   - executed `DB_SEED_MODE=snapshot php artisan db:seed --force`
   - verified populated counts (products, categories, users, orders)
+- Fixed Google OAuth runtime issues:
+  - aligned frontend/backend redirect URI config
+  - resolved `redirect_uri_mismatch` after OAuth client configuration alignment
+- Fixed email verification runtime issues:
+  - corrected mail scheme handling (`smtp`/`smtps`)
+  - verification flow now sends successfully with configured SMTP credentials
+- Fixed cart/runtime Redis issues:
+  - installed PHP Redis extension in backend image
+  - enabled TLS Redis connection settings for Azure Redis (`REDIS_SCHEME=tls`)
+  - cart add/update flow now works as expected
+
+### Session result
+- Dev environment is now fully functional end-to-end (frontend, backend, DB, Redis, OAuth, email verification, cart).
 
 ### Current risks / watch items
-- Root cause identified for DB auth regression: deploy step reapplied `01-secret-backend.template.yaml`, overwriting `backend-secrets` with `__FROM_KEYVAULT_*` placeholders.
-- Azure MySQL enforces secure transport; runtime now needs `MYSQL_ATTR_SSL_CA` in backend env for migrations and app DB checks.
 - Temporary `nip.io` domains are tied to current load balancer IP; if ingress IP changes, URLs must be updated.
+- Google OAuth on temporary HTTP `nip.io` is acceptable for dev testing but should move to real HTTPS domain for staging/prod.
 
 ### Exit criteria
 - [x] Workflow skeleton created with correct trigger
@@ -237,12 +249,30 @@ Date: 2026-04-02
 - [x] First push to `dev` completes full end-to-end successfully
 
 ### Carry-over
-1. Set GitHub `dev` environment variables for public checks:
-  - `BACKEND_PUBLIC_URL=http://dev-api.20.247.224.41.nip.io`
-  - `FRONTEND_PUBLIC_URL=http://dev.20.247.224.41.nip.io`
-  - `CORS_ALLOWED_ORIGINS=http://dev.20.247.224.41.nip.io`
-2. Add GitHub `dev` OAuth/mail variables:
-  - `GOOGLE_CLIENT_ID`, `GOOGLE_REDIRECT_URI`, `MAIL_MAILER`, `MAIL_SCHEME`, `MAIL_HOST`, `MAIL_PORT`, `MAIL_FROM_ADDRESS`
-3. Trigger one `deploy-dev` workflow run to apply OAuth/mail config + rebuilt frontend.
-4. Start staging environment setup using the same pipeline and config contract.
-5.
+1. Keep deployment scope dev-only for demo period (no staging workflow for now).
+2. Replace temporary `nip.io` hosts with real HTTPS domain planning when budget allows.
+3. Optional hardening pass: alerts, backup checks, and periodic smoke schedule.
+
+---
+
+## Day 4 - Dev Workflow Enhancements (Planned)
+
+Date: 2026-04-03
+
+### Goal
+- Improve reliability and demo readiness in dev-only mode while controlling infrastructure cost.
+
+### Planned scope
+- Strengthen `deploy-dev` diagnostics and post-deploy validations.
+- Add/refresh runbook for stopping and starting AKS + dependent services safely.
+- Verify restart checklist:
+  - ingress public IP consistency
+  - `nip.io` URL validity
+  - OAuth redirect URL consistency
+  - smoke checks after restart
+- Prioritize additional feature polish required by project rubric.
+
+### Day 4 exit criteria (planned)
+- [ ] Dev-only runbook documented and validated once.
+- [ ] Restart + redeploy + smoke cycle passes after stop/start.
+- [ ] Remaining required feature gaps are listed and prioritized.
