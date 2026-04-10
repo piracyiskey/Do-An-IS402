@@ -1,0 +1,3 @@
+product_name,slug,sku,brand_slug,brand_name,category_slugs,base_price,sale_price,stock_quantity,is_featured,short_description,full_description,image_files,image_alt_prefix
+Galaxy A5 Demo,galaxy-a5-demo,A5-DEMO-001,samsung,Samsung,galaxy-smartphone|mobile,499.99,449.99,25,true,Demo phone for ETL,Imported by CSV ETL for dev testing,main.jpg|back.jpg|side.jpg,Galaxy A5 Demo
+Galaxy Tab Mini Demo,galaxy-tab-mini-demo,TAB-DEMO-001,samsung,Samsung,galaxy-tab|mobile,699.99,649.99,15,false,Demo tablet for ETL,Imported by CSV ETL for dev testing,main.jpg|screen.jpg,Galaxy Tab Mini Demo
