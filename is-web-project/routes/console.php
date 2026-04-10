@@ -4,6 +4,7 @@ use App\Models\Brand;
 use App\Models\Category;
 use App\Models\Product;
 use App\Models\ProductImage;
+use App\Models\ProductVariant;
 use Illuminate\Foundation\Inspiring;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\DB;
@@ -83,11 +84,84 @@ Artisan::command('etl:import-products {--file=database/etl/products.sample.csv} 
     $updated = 0;
     $failed = 0;
 
+    $parseAttributes = static function (string $raw): array {
+        $result = [];
+        $pairs = array_values(array_filter(array_map('trim', explode(',', $raw))));
+
+        foreach ($pairs as $pair) {
+            $parts = explode(':', $pair, 2);
+            if (count($parts) !== 2) {
+                throw new RuntimeException("Invalid variant attributes segment: '{$pair}'. Expected key:value.");
+            }
+            $key = trim($parts[0]);
+            $value = trim($parts[1]);
+            if ($key === '' || $value === '') {
+                throw new RuntimeException("Invalid variant attributes segment: '{$pair}'. Key/value must be non-empty.");
+            }
+            $result[$key] = $value;
+        }
+
+        return $result;
+    };
+
+    $parseVariants = static function (array $row, int $defaultStock, string $productSku, string $productName) use ($parseAttributes): array {
+        $raw = trim((string) ($row['variants'] ?? ''));
+
+        if ($raw === '') {
+            return [[
+                'variant_name' => $productName.' Default',
+                'sku' => $productSku.'-BASE',
+                'additional_price' => 0,
+                'stock_quantity' => $defaultStock,
+                'attributes' => ['model' => 'default'],
+            ]];
+        }
+
+        $entries = array_values(array_filter(array_map('trim', explode(';', $raw))));
+        $variants = [];
+
+        foreach ($entries as $index => $entry) {
+            $parts = array_map('trim', explode('|', $entry));
+            if (count($parts) < 5) {
+                throw new RuntimeException("Invalid variants format at entry {$index}. Expected name|sku|additional_price|stock_quantity|key:value,key:value");
+            }
+
+            [$variantName, $variantSku, $additionalPriceRaw, $stockRaw, $attributesRaw] = $parts;
+
+            if ($variantName === '') {
+                throw new RuntimeException("Variant name is empty at entry {$index}.");
+            }
+
+            if ($variantSku === '') {
+                $variantSku = $productSku.'-V'.($index + 1);
+            }
+
+            if (! is_numeric($additionalPriceRaw) || ! is_numeric($stockRaw)) {
+                throw new RuntimeException("Variant additional_price or stock_quantity is invalid at entry {$index}.");
+            }
+
+            $attributes = $parseAttributes($attributesRaw);
+            if (empty($attributes)) {
+                throw new RuntimeException("Variant attributes are empty at entry {$index}.");
+            }
+
+            $variants[] = [
+                'variant_name' => $variantName,
+                'sku' => $variantSku,
+                'additional_price' => (float) $additionalPriceRaw,
+                'stock_quantity' => (int) $stockRaw,
+                'attributes' => $attributes,
+            ];
+        }
+
+        return $variants;
+    };
+
     foreach ($rows as $index => $row) {
         $lineNumber = $index + 2;
 
         try {
-            DB::transaction(function () use ($row, &$created, &$updated, &$processed): void {
+            DB::transaction(function () use ($row, $parseVariants, &$created, &$updated, &$processed): void {
                 $productName = $row['product_name'];
                 $slug = Str::slug($row['slug'] ?: $productName);
                 $sku = $row['sku'];
@@ -126,6 +200,9 @@ Artisan::command('etl:import-products {--file=database/etl/products.sample.csv} 
                     throw new RuntimeException('image_files is empty.');
                 }
 
+                $defaultStock = $row['stock_quantity'] !== '' ? (int) $row['stock_quantity'] : 0;
+                $variants = $parseVariants($row, $defaultStock, $sku, $productName);
+
                 $brand = Brand::query()->firstOrCreate(
                     ['slug' => $brandSlug],
                     ['brand_name' => $brandName]
@@ -156,6 +233,18 @@ Artisan::command('etl:import-products {--file=database/etl/products.sample.csv} 
                 }
 
                 $product->categories()->sync($categories->pluck('category_id')->all());
+
+                ProductVariant::query()->where('product_id', $product->product_id)->delete();
+                foreach ($variants as $variant) {
+                    ProductVariant::query()->create([
+                        'product_id' => $product->product_id,
+                        'variant_name' => $variant['variant_name'],
+                        'sku' => $variant['sku'],
+                        'additional_price' => $variant['additional_price'],
+                        'stock_quantity' => $variant['stock_quantity'],
+                        'attributes' => $variant['attributes'],
+                    ]);
+                }
 
                 ProductImage::query()->where('product_id', $product->product_id)->delete();
                 foreach ($imageFiles as $position => $filename) {
@@ -193,4 +282,4 @@ Artisan::command('etl:import-products {--file=database/etl/products.sample.csv} 
     $this->line('Failed: '.$failed);
 
     return $failed > 0 ? 1 : 0;
-})->purpose('Import products from CSV into products/categories/images (no variants)');
+})->purpose('Import products from CSV into products/categories/variants/images');
