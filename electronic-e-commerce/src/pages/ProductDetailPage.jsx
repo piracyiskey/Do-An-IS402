@@ -4,7 +4,8 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { addToCart } from "../lib/cartService"; // Sử dụng hàm từ service bạn đã cung cấp
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
-const BASE_URL = import.meta.env.VITE_BACKEND_API_URL;
+import { buildApiUrl, buildImageUrl } from '../lib/url';
+
 const ProductDetailPage = () => {
     const { product_id } = useParams();
     const navigate = useNavigate();
@@ -27,7 +28,7 @@ const ProductDetailPage = () => {
         const fetchProductDetail = async () => {
             try {
                 setLoading(true);
-                const response = await axios.get(`${BASE_URL}/product/${product_id}`);
+                const response = await axios.get(buildApiUrl(`/product/${product_id}`));
                 if (response.data.success) {
                     const data = response.data.product_variants;
                     const imgs = response.data.images;
@@ -126,7 +127,7 @@ const ProductDetailPage = () => {
                     <div className="w-full lg:w-1/2 space-y-4">
                         <div className="aspect-square bg-gray-50 rounded-3xl overflow-hidden flex items-center justify-center p-10 border border-gray-100">
                             <img 
-                                src={`${mainImage}`} 
+                                src={buildImageUrl(mainImage)} 
                                 alt={`${mainImage}`} 
                                 className="max-h-full object-contain transition-transform duration-700 hover:scale-110" 
                             />
@@ -142,7 +143,7 @@ const ProductDetailPage = () => {
                                     }`}
                                 >
                                     <img 
-                                        src={`${img.image_url}`} 
+                                        src={buildImageUrl(img.image_url)} 
                                         className="w-full h-full object-contain" 
                                         alt={`Thumbnail ${idx}`} 
                                     />
