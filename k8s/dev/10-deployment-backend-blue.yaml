@@ -1,0 +1,74 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: backend-blue
+  namespace: dev
+  labels:
+    app: backend-blue
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: backend-blue
+  template:
+    metadata:
+      labels:
+        app: backend-blue
+    spec:
+      initContainers:
+        - name: copy-app
+          image: esappdacr.azurecr.io/esapp-backend:IMAGE_TAG
+          imagePullPolicy: IfNotPresent
+          command: ["sh", "-c", "cp -a /var/www/. /workdir/"]
+          volumeMounts:
+            - name: app-code
+              mountPath: /workdir
+      containers:
+        - name: nginx
+          image: nginx:1.27-alpine
+          imagePullPolicy: IfNotPresent
+          ports:
+            - name: http
+              containerPort: 80
+          volumeMounts:
+            - name: app-code
+              mountPath: /var/www
+            - name: nginx-config
+              mountPath: /etc/nginx/conf.d/default.conf
+              subPath: default.conf
+          readinessProbe:
+            httpGet:
+              path: /up
+              port: http
+            initialDelaySeconds: 10
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 6
+          livenessProbe:
+            httpGet:
+              path: /up
+              port: http
+            initialDelaySeconds: 30
+            periodSeconds: 15
+            timeoutSeconds: 5
+            failureThreshold: 6
+        - name: php-fpm
+          image: esappdacr.azurecr.io/esapp-backend:IMAGE_TAG
+          imagePullPolicy: IfNotPresent
+          ports:
+            - name: fpm
+              containerPort: 9000
+          envFrom:
+            - configMapRef:
+                name: backend-config
+            - secretRef:
+                name: backend-secrets
+          volumeMounts:
+            - name: app-code
+              mountPath: /var/www
+      volumes:
+        - name: app-code
+          emptyDir: {}
+        - name: nginx-config
+          configMap:
+            name: backend-nginx-config

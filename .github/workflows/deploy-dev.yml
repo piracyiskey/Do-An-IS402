@@ -278,6 +278,10 @@ jobs:
           kubectl apply -f k8s/dev-rendered/11-service-backend.yaml
           kubectl apply -f k8s/dev-rendered/20-deployment-frontend.yaml
           kubectl apply -f k8s/dev-rendered/21-service-frontend.yaml
+          kubectl apply -f k8s/dev-rendered/10-deployment-backend-blue.yaml
+          kubectl apply -f k8s/dev-rendered/11-service-backend-blue.yaml
+          kubectl apply -f k8s/dev-rendered/20-deployment-frontend-blue.yaml
+          kubectl apply -f k8s/dev-rendered/21-service-frontend-blue.yaml
           kubectl apply -f k8s/dev-rendered/30-ingress.yaml
 
       - name: Validate backend secret values are not placeholders
