@@ -20,7 +20,11 @@ RUN sed -i 's/user = www-data/;/g' /usr/local/etc/php-fpm.d/www.conf \
 
 WORKDIR /var/www
 
+# Copy files and transfer ownership to www-data
 COPY --chown=www-data:www-data . .
+
+# Ensure the root of the workspace is also owned by www-data so it can create the vendor directory
+RUN chown -R www-data:www-data /var/www
 
 USER www-data
 

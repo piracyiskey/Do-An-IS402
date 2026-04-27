@@ -5,6 +5,12 @@ FROM node:20-alpine AS development
 
 WORKDIR /app
 
+# Ensure the app folder is owned by the node user
+RUN chown -R node:node /app
+
+# Switch to node user before running installs
+USER node
+
 # Copy package files
 COPY --chown=node:node package*.json ./
 
@@ -13,8 +19,6 @@ RUN npm install
 
 # Copy application code
 COPY --chown=node:node . .
-
-USER node
 
 # Expose Vite dev server port
 EXPOSE 5173
