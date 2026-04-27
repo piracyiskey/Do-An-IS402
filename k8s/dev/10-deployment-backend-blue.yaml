@@ -19,7 +19,9 @@ spec:
         - name: copy-app
           image: esappdacr.azurecr.io/esapp-backend:IMAGE_TAG
           imagePullPolicy: IfNotPresent
-          command: ["sh", "-c", "cp -a /var/www/. /workdir/"]
+          securityContext:
+            runAsUser: 0
+          command: ["sh", "-c", "cp -a /var/www/. /workdir/ && chown -R 33:33 /workdir"]
           volumeMounts:
             - name: app-code
               mountPath: /workdir
