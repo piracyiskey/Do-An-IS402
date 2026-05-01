@@ -1,14 +1,4 @@
+.git
 node_modules
-npm-debug.log
 dist
 .env
-.env.local
-.env.*.local
-.git
-.gitignore
-.vscode
-.idea
-*.md
-.DS_Store
-coverage
-.eslintcache

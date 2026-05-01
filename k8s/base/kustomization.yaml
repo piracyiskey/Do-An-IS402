@@ -1,0 +1,14 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+namespace: esapp
+resources:
+  - namespace.yaml
+  - serviceaccount-rbac.yaml
+  - network-policy.yaml
+  - configmap.yaml
+  - secret-provider-class.yaml
+  - statefulset.yaml
+  - backend.yaml
+  - frontend.yaml
+  - ingress.yaml
+  - hpa.yaml

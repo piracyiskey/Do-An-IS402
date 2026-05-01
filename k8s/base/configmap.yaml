@@ -1,0 +1,19 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: backend-config
+  namespace: esapp
+data:
+  APP_ENV: production
+  APP_DEBUG: "false"
+  CACHE_DRIVER: redis
+  QUEUE_CONNECTION: redis
+  REDIS_HOST: redis
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: frontend-config
+  namespace: esapp
+data:
+  API_BASE_URL: https://api.example.com

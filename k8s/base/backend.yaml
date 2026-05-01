@@ -1,0 +1,62 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: backend
+  namespace: esapp
+  labels:
+    app: backend
+    app.kubernetes.io/part-of: esapp
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: backend
+  template:
+    metadata:
+      labels:
+        app: backend
+        app.kubernetes.io/part-of: esapp
+        azure.workload.identity/use: "true"
+    spec:
+      serviceAccountName: workload-sa
+      containers:
+        - name: backend
+          image: ${ACR_LOGIN_SERVER}/is-web-project:latest
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 9000
+          envFrom:
+            - configMapRef:
+                name: backend-config
+            - secretRef:
+                name: app-secrets
+          volumeMounts:
+            - name: kv-secrets
+              mountPath: /mnt/secrets-store
+              readOnly: true
+          resources:
+            requests:
+              cpu: 150m
+              memory: 256Mi
+            limits:
+              cpu: 1000m
+              memory: 1Gi
+      volumes:
+        - name: kv-secrets
+          csi:
+            driver: secrets-store.csi.k8s.io
+            readOnly: true
+            volumeAttributes:
+              secretProviderClass: azure-keyvault-esapp
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: backend
+  namespace: esapp
+spec:
+  selector:
+    app: backend
+  ports:
+    - port: 80
+      targetPort: 9000

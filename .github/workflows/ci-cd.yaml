@@ -1,0 +1,108 @@
+name: ci-cd
+
+on:
+  push:
+    branches: ["main"]
+  pull_request:
+
+permissions:
+  id-token: write
+  contents: write
+
+env:
+  BACKEND_IMAGE: is-web-project
+  FRONTEND_IMAGE: electronic-e-commerce
+
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Azure login (OIDC)
+        uses: azure/login@v2
+        with:
+          client-id: ${{ vars.AZURE_CLIENT_ID }}
+          tenant-id: ${{ vars.AZURE_TENANT_ID }}
+          subscription-id: ${{ vars.AZURE_SUBSCRIPTION_ID }}
+
+      - name: Resolve deployment context from Azure
+        id: ctx
+        run: |
+          set -euo pipefail
+          ACR_NAME="${{ vars.ACR_NAME }}"
+          KV_NAME="${{ vars.KEYVAULT_NAME }}"
+
+          if [ -z "$ACR_NAME" ] || [ -z "$KV_NAME" ]; then
+            echo "ACR_NAME and KEYVAULT_NAME must be set as GitHub Environment variables."
+            exit 1
+          fi
+
+          echo "ACR_NAME=$ACR_NAME" >> "$GITHUB_ENV"
+          echo "KEYVAULT_NAME=$KV_NAME" >> "$GITHUB_ENV"
+          echo "ACR_LOGIN_SERVER=$(az acr show -n "$ACR_NAME" --query loginServer -o tsv)" >> "$GITHUB_ENV"
+
+      - name: Load runtime secrets from Azure Key Vault (no GitHub secret copy)
+        run: |
+          set -euo pipefail
+          echo "WORKLOAD_IDENTITY_CLIENT_ID=$(az keyvault secret show --vault-name "$KEYVAULT_NAME" --name workload-identity-client-id --query value -o tsv)" >> "$GITHUB_ENV"
+          echo "AZURE_TENANT_ID_VALUE=$(az keyvault secret show --vault-name "$KEYVAULT_NAME" --name azure-tenant-id --query value -o tsv)" >> "$GITHUB_ENV"
+          echo "INGRESS_APP_HOST=$(az keyvault secret show --vault-name "$KEYVAULT_NAME" --name ingress-app-host --query value -o tsv)" >> "$GITHUB_ENV"
+          echo "INGRESS_API_HOST=$(az keyvault secret show --vault-name "$KEYVAULT_NAME" --name ingress-api-host --query value -o tsv)" >> "$GITHUB_ENV"
+
+      - name: ACR login via Azure identity
+        run: az acr login --name "$ACR_NAME"
+
+      - name: Build and push backend image
+        run: |
+          docker build -t "$ACR_LOGIN_SERVER/$BACKEND_IMAGE:${{ github.sha }}" is-web-project
+          docker push "$ACR_LOGIN_SERVER/$BACKEND_IMAGE:${{ github.sha }}"
+
+      - name: Build and push frontend image
+        run: |
+          docker build -t "$ACR_LOGIN_SERVER/$FRONTEND_IMAGE:${{ github.sha }}" electronic-e-commerce
+          docker push "$ACR_LOGIN_SERVER/$FRONTEND_IMAGE:${{ github.sha }}"
+
+      - name: Render manifests with environment values
+        run: |
+          set -euo pipefail
+          sed -i "s|\${ACR_LOGIN_SERVER}|$ACR_LOGIN_SERVER|g" k8s/base/backend.yaml
+          sed -i "s|\${ACR_LOGIN_SERVER}|$ACR_LOGIN_SERVER|g" k8s/base/frontend.yaml
+          sed -i "s|:latest|:${{ github.sha }}|g" k8s/base/backend.yaml
+          sed -i "s|:latest|:${{ github.sha }}|g" k8s/base/frontend.yaml
+
+          sed -i "s|\${WORKLOAD_IDENTITY_CLIENT_ID}|$WORKLOAD_IDENTITY_CLIENT_ID|g" k8s/base/serviceaccount-rbac.yaml
+          sed -i "s|\${WORKLOAD_IDENTITY_CLIENT_ID}|$WORKLOAD_IDENTITY_CLIENT_ID|g" k8s/base/secret-provider-class.yaml
+          sed -i "s|\${KEYVAULT_NAME}|$KEYVAULT_NAME|g" k8s/base/secret-provider-class.yaml
+          sed -i "s|\${AZURE_TENANT_ID}|$AZURE_TENANT_ID_VALUE|g" k8s/base/secret-provider-class.yaml
+          sed -i "s|app.example.com|$INGRESS_APP_HOST|g" k8s/base/ingress.yaml
+          sed -i "s|api.example.com|$INGRESS_API_HOST|g" k8s/base/ingress.yaml
+
+      - name: Commit manifest updates
+        if: github.ref == 'refs/heads/main'
+        run: |
+          git config user.name github-actions
+          git config user.email github-actions@github.com
+          git add k8s/base/backend.yaml k8s/base/frontend.yaml k8s/base/secret-provider-class.yaml k8s/base/serviceaccount-rbac.yaml k8s/base/ingress.yaml
+          git commit -m "chore: render deployment manifests for ${{ github.sha }}" || true
+          git push
+
+  argocd-sync:
+    if: github.ref == 'refs/heads/main'
+    needs: build-and-push
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - name: Azure login (OIDC)
+        uses: azure/login@v2
+        with:
+          client-id: ${{ vars.AZURE_CLIENT_ID }}
+          tenant-id: ${{ vars.AZURE_TENANT_ID }}
+          subscription-id: ${{ vars.AZURE_SUBSCRIPTION_ID }}
+
+      - name: ArgoCD sync via AKS kubectl (no Argo token in GitHub)
+        run: |
+          set -euo pipefail
+          az aks get-credentials --resource-group "${{ vars.AKS_RESOURCE_GROUP }}" --name "${{ vars.AKS_CLUSTER_NAME }}" --overwrite-existing
+          kubectl -n argocd annotate application esapp argocd.argoproj.io/refresh=hard --overwrite
