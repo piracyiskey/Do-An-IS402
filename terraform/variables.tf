@@ -132,3 +132,34 @@ variable "keyvault_sku" {
   type        = string
   default     = "standard"
 }
+
+# Azure Functions — Email Sender
+variable "function_mail_host" {
+  description = "SMTP host for Azure Function email sender"
+  type        = string
+  default     = "smtp.gmail.com"
+}
+
+variable "function_mail_port" {
+  description = "SMTP port for Azure Function email sender"
+  type        = string
+  default     = "587"
+}
+
+variable "function_mail_username" {
+  description = "SMTP username for Azure Function email sender"
+  type        = string
+  sensitive   = true
+}
+
+variable "function_mail_password" {
+  description = "SMTP password (app password) for Azure Function email sender"
+  type        = string
+  sensitive   = true
+}
+
+variable "function_mail_from_address" {
+  description = "From address for Azure Function emails"
+  type        = string
+  default     = "no-reply@esapp.dev"
+}

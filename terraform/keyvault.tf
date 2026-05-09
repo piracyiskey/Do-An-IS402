@@ -36,3 +36,16 @@ resource "azurerm_key_vault_secret" "redis_password" {
   value        = azurerm_redis_cache.main.primary_access_key
   key_vault_id = azurerm_key_vault.main.id
 }
+
+# Store Azure Function default host key for secure invocation
+resource "azurerm_key_vault_secret" "function_host_key" {
+  name         = "FUNCTION-HOST-KEY"
+  value        = data.azurerm_function_app_host_keys.email.default_function_key
+  key_vault_id = azurerm_key_vault.main.id
+}
+
+# Data source to read the auto-generated function host keys
+data "azurerm_function_app_host_keys" "email" {
+  name                = azurerm_linux_function_app.email.name
+  resource_group_name = data.azurerm_resource_group.main.name
+}

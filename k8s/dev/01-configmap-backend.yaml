@@ -35,6 +35,8 @@ data:
   MAIL_PORT: "587"
   MAIL_FROM_ADDRESS: "no-reply@esapp.dev"
 
+  AZURE_FUNCTION_URL: "https://esapp-func-email-dev.azurewebsites.net"
+
   JWT_ALGO: "HS256"
   GOOGLE_CLIENT_ID: "940152986387-hmnurcj182oerad7tik3d6pn26ib8ej9.apps.googleusercontent.com"
   GOOGLE_REDIRECT_URI: "http://dev.20.247.224.41.nip.io/auth/callback"

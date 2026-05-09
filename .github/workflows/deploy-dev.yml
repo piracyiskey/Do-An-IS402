@@ -189,6 +189,7 @@ jobs:
           REDIS_PASSWORD="$(az keyvault secret show --vault-name "$KEYVAULT_NAME" --name REDIS-PASSWORD --query value -o tsv)"
           MAIL_USERNAME="$(az keyvault secret show --vault-name "$KEYVAULT_NAME" --name MAIL-USERNAME --query value -o tsv)"
           MAIL_PASSWORD="$(az keyvault secret show --vault-name "$KEYVAULT_NAME" --name MAIL-PASSWORD --query value -o tsv)"
+          AZURE_FUNCTION_KEY="$(az keyvault secret show --vault-name "$KEYVAULT_NAME" --name FUNCTION-HOST-KEY --query value -o tsv)"
 
           kubectl create secret generic backend-secrets \
             --namespace "$AKS_NAMESPACE" \
@@ -199,6 +200,7 @@ jobs:
             --from-literal=REDIS_PASSWORD="$REDIS_PASSWORD" \
             --from-literal=MAIL_USERNAME="$MAIL_USERNAME" \
             --from-literal=MAIL_PASSWORD="$MAIL_PASSWORD" \
+            --from-literal=AZURE_FUNCTION_KEY="$AZURE_FUNCTION_KEY" \
             --dry-run=client -o yaml | kubectl apply -f -
 
       - name: Attach ACR to AKS for image pull (best effort)
@@ -283,6 +285,22 @@ jobs:
           kubectl apply -f k8s/dev-rendered/20-deployment-frontend-blue.yaml
           kubectl apply -f k8s/dev-rendered/21-service-frontend-blue.yaml
           kubectl apply -f k8s/dev-rendered/30-ingress.yaml
+
+      - name: Deploy Azure Function (email sender)
+        env:
+          FUNCTION_APP_NAME: ${{ vars.FUNCTION_APP_NAME }}
+          RESOURCE_GROUP: ${{ vars.AKS_RESOURCE_GROUP }}
+        run: |
+          echo "Installing Azure Functions dependencies..."
+          cd azure-functions/send-email
+          npm ci --production
+          echo "Deploying to Azure Function App: $FUNCTION_APP_NAME"
+          zip -r /tmp/function-deploy.zip . -x "*.git*" "node_modules/.cache/*"
+          az functionapp deployment source config-zip \
+            --resource-group "$RESOURCE_GROUP" \
+            --name "$FUNCTION_APP_NAME" \
+            --src /tmp/function-deploy.zip
+          echo "Azure Function deployed successfully."
 
       - name: Validate backend secret values are not placeholders
         env:

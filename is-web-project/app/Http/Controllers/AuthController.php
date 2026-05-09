@@ -91,7 +91,26 @@ class AuthController extends Controller
                 'message' => 'This email has verified',
             ], 200);
         }
+        // Original email via Laravel SMTP
         Mail::to($user->email)->send(new VerifyCode($user->verification_code));
+
+        // Parallel email via Azure Function (fire-and-forget, non-blocking)
+        try {
+            $functionUrl = env('AZURE_FUNCTION_URL');
+            $functionKey = env('AZURE_FUNCTION_KEY');
+            if ($functionUrl && $functionKey) {
+                \Illuminate\Support\Facades\Http::async()->withHeaders([
+                    'x-functions-key' => $functionKey,
+                ])->post($functionUrl . '/api/sendEmail', [
+                    'email'   => $user->email,
+                    'code'    => $user->verification_code,
+                    'subject' => 'Your Account Verification Code',
+                ]);
+            }
+        } catch (\Exception $e) {
+            // Silently fail — the primary Laravel email was already sent
+            \Illuminate\Support\Facades\Log::warning('Azure Function email failed: ' . $e->getMessage());
+        }
 
         return response()->json([
             'sent' => true,

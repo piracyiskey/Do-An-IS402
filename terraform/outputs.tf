@@ -77,6 +77,17 @@ output "log_analytics_workspace_id" {
   description = "Log Analytics workspace ID"
 }
 
+# Azure Functions
+output "function_app_url" {
+  value       = "https://${azurerm_linux_function_app.email.default_hostname}"
+  description = "Azure Function App base URL"
+}
+
+output "function_app_name" {
+  value       = azurerm_linux_function_app.email.name
+  description = "Azure Function App name (for CLI deployment)"
+}
+
 # Summary
 output "deployment_summary" {
   value = {
@@ -90,5 +101,6 @@ output "deployment_summary" {
     redis_hostname       = azurerm_redis_cache.main.hostname
     redis_ssl_port       = azurerm_redis_cache.main.ssl_port
     keyvault_name        = azurerm_key_vault.main.name
+    function_app_url     = "https://${azurerm_linux_function_app.email.default_hostname}"
   }
 }

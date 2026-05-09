@@ -1,0 +1,16 @@
+{
+  "name": "esapp-send-email",
+  "version": "1.0.0",
+  "description": "Azure Function for sending verification emails",
+  "main": "src/functions/*.js",
+  "scripts": {
+    "start": "func start",
+    "test": "echo \"No tests yet\""
+  },
+  "dependencies": {
+    "nodemailer": "^6.9.0"
+  },
+  "devDependencies": {
+    "@azure/functions": "^4.0.0"
+  }
+}
