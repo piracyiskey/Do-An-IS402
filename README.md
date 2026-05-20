@@ -21,13 +21,13 @@ The system is split into:
 
 ## 🎥 Demo Video
 
-[![Project Demo Video](electronic-e-commerce/screenshot/Thumbnail.png)](https://drive.google.com/file/d/1UGKC78UHIDc8RhGz5UgUc0hbyAWz4y1H/view?usp=drive_link)
+[![Project Demo Video](electronic-e-commerce/screenshots/Thumbnail.png)](https://drive.google.com/file/d/1UGKC78UHIDc8RhGz5UgUc0hbyAWz4y1H/view?usp=drive_link)
 
 ---
 
 ## 🏗️ Architecture
 
-![Architecture Diagram - Placeholder](electronic-e-commerce/screenshot/Architecture.png)
+![Architecture Diagram - Placeholder](electronic-e-commerce/screenshots/Architecture.png)
 
 ### Core Components & Azure Services
 | Service Name | Model | Role in Project |
@@ -67,7 +67,7 @@ The system is split into:
 
 ## 🚀 CI/CD Pipeline Workflow
 
-![CI/CD Pipeline - Placeholder](electronic-e-commerce/screenshot/CICD.png)
+![CI/CD Pipeline - Placeholder](electronic-e-commerce/screenshots/CICD.png)
 
 Our GitHub Actions pipeline (`deploy-dev.yml`) automates the entire delivery process:
 1. **Lint & Test:** Code formatting via Laravel Pint and unit testing.
@@ -80,7 +80,7 @@ Our GitHub Actions pipeline (`deploy-dev.yml`) automates the entire delivery pro
 
 ## 📊 Performance & Load Testing
 
-![K6 Load Test Results - Placeholder](electronic-e-commerce/screenshot/k6.png)
+![K6 Load Test Results - Placeholder](electronic-e-commerce/screenshots/k6.png)
 
 We utilize **k6** to simulate high-concurrency environments and monitor Azure infrastructure limits. 
 - **Read/Write Operations:** Load profiles distribute traffic between read-heavy GETs and write-heavy POSTs.
