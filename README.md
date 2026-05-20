@@ -25,6 +25,21 @@ The system is split into:
 
 ---
 
+## 🛒 Web Application Features
+
+The core application consists of a **React (Vite) Single Page Application** interacting with a **Laravel REST API**.
+
+### For Customers:
+- **Authentication & Security:** Secure JWT-based login, Google OAuth integration, and email verification workflows.
+- **Product Discovery:** Browse products dynamically across categories (Computing, Mobile, TV & AV) with detailed product pages.
+- **Shopping Cart & Checkout:** Seamless cart management, promotional code application, and secure order placement.
+- **User Dashboard:** Dedicated profile management where users can track active/past orders, view order details, and manage loyalty rewards (`My Rewards`).
+
+### For Administrators:
+- **Admin Dashboard:** A centralized portal for managing inventory, tracking overall sales, updating order statuses, and managing customer accounts.
+
+---
+
 ## 🏗️ Architecture
 
 ![Architecture Diagram - Placeholder](electronic-e-commerce/screenshots/Architecture.png)
