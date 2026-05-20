@@ -9,7 +9,7 @@
 ![GitHub Actions](https://img.shields.io/badge/GitHub%20Actions-20232A?style=for-the-badge&logo=github-actions&logoColor=white)
 
 ## 📖 Overview
-ESApp is a modern, highly scalable Electronic E-Commerce platform built using a microservices-inspired architecture. Designed to handle high-traffic workloads, the project leverages a **Cloud-Native (CNCF)** approach on **Microsoft Azure**, integrating container orchestration, managed databases, automated CI/CD pipelines, and serverless computing.
+ESApp is a modern, highly scalable E-Commerce platform for Samsung products built using a microservices-inspired architecture. Designed to handle high-traffic workloads, the project leverages a **Cloud-Native (CNCF)** approach on **Microsoft Azure**, integrating container orchestration, managed databases, automated CI/CD pipelines, and serverless computing.
 
 The system is split into:
 - **Frontend:** React (Vite) Single Page Application (SPA).
